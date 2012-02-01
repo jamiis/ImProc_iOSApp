@@ -1,0 +1,264 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1C99998B14D8CA9C00451D60 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C99998A14D8CA9C00451D60 /* UIKit.framework */; };
+		1C99998D14D8CA9C00451D60 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C99998C14D8CA9C00451D60 /* Foundation.framework */; };
+		1C99998F14D8CA9C00451D60 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C99998E14D8CA9C00451D60 /* CoreGraphics.framework */; };
+		1C99999514D8CA9C00451D60 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1C99999314D8CA9C00451D60 /* InfoPlist.strings */; };
+		1C99999714D8CA9C00451D60 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C99999614D8CA9C00451D60 /* main.m */; };
+		1C99999B14D8CA9C00451D60 /* OFAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C99999A14D8CA9C00451D60 /* OFAppDelegate.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1C99998614D8CA9C00451D60 /* ImgProc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImgProc.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C99998A14D8CA9C00451D60 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		1C99998C14D8CA9C00451D60 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1C99998E14D8CA9C00451D60 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		1C99999214D8CA9C00451D60 /* ImgProc-Info.plist */ = {isa = PBXFileReference; path = "ImgProc-Info.plist"; sourceTree = "<group>"; };
+		1C99999414D8CA9C00451D60 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1C99999614D8CA9C00451D60 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		1C99999814D8CA9C00451D60 /* ImgProc-Prefix.pch */ = {isa = PBXFileReference; path = "ImgProc-Prefix.pch"; sourceTree = "<group>"; };
+		1C99999914D8CA9C00451D60 /* OFAppDelegate.h */ = {isa = PBXFileReference; path = OFAppDelegate.h; sourceTree = "<group>"; };
+		1C99999A14D8CA9C00451D60 /* OFAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OFAppDelegate.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1C99998314D8CA9B00451D60 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C99998B14D8CA9C00451D60 /* UIKit.framework in Frameworks */,
+				1C99998D14D8CA9C00451D60 /* Foundation.framework in Frameworks */,
+				1C99998F14D8CA9C00451D60 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1C99997B14D8CA9B00451D60 = {
+			isa = PBXGroup;
+			children = (
+				1C99999014D8CA9C00451D60 /* ImgProc */,
+				1C99998914D8CA9C00451D60 /* Frameworks */,
+				1C99998714D8CA9C00451D60 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1C99998714D8CA9C00451D60 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1C99998614D8CA9C00451D60 /* ImgProc.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1C99998914D8CA9C00451D60 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1C99998A14D8CA9C00451D60 /* UIKit.framework */,
+				1C99998C14D8CA9C00451D60 /* Foundation.framework */,
+				1C99998E14D8CA9C00451D60 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1C99999014D8CA9C00451D60 /* ImgProc */ = {
+			isa = PBXGroup;
+			children = (
+				1C99999914D8CA9C00451D60 /* OFAppDelegate.h */,
+				1C99999A14D8CA9C00451D60 /* OFAppDelegate.m */,
+				1C99999114D8CA9C00451D60 /* Supporting Files */,
+			);
+			path = ImgProc;
+			sourceTree = "<group>";
+		};
+		1C99999114D8CA9C00451D60 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1C99999214D8CA9C00451D60 /* ImgProc-Info.plist */,
+				1C99999314D8CA9C00451D60 /* InfoPlist.strings */,
+				1C99999614D8CA9C00451D60 /* main.m */,
+				1C99999814D8CA9C00451D60 /* ImgProc-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1C99998514D8CA9B00451D60 /* ImgProc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1C99999E14D8CA9C00451D60 /* Build configuration list for PBXNativeTarget "ImgProc" */;
+			buildPhases = (
+				1C99998214D8CA9B00451D60 /* Sources */,
+				1C99998314D8CA9B00451D60 /* Frameworks */,
+				1C99998414D8CA9B00451D60 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ImgProc;
+			productName = ImgProc;
+			productReference = 1C99998614D8CA9C00451D60 /* ImgProc.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1C99997D14D8CA9B00451D60 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = "University of Utah";
+			};
+			buildConfigurationList = 1C99998014D8CA9B00451D60 /* Build configuration list for PBXProject "ImgProc" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1C99997B14D8CA9B00451D60;
+			productRefGroup = 1C99998714D8CA9C00451D60 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1C99998514D8CA9B00451D60 /* ImgProc */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1C99998414D8CA9B00451D60 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C99999514D8CA9C00451D60 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1C99998214D8CA9B00451D60 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C99999714D8CA9C00451D60 /* main.m in Sources */,
+				1C99999B14D8CA9C00451D60 /* OFAppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		1C99999314D8CA9C00451D60 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1C99999414D8CA9C00451D60 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1C99999C14D8CA9C00451D60 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1C99999D14D8CA9C00451D60 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		1C99999F14D8CA9C00451D60 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ImgProc/ImgProc-Prefix.pch";
+				INFOPLIST_FILE = "ImgProc/ImgProc-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		1C9999A014D8CA9C00451D60 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ImgProc/ImgProc-Prefix.pch";
+				INFOPLIST_FILE = "ImgProc/ImgProc-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1C99998014D8CA9B00451D60 /* Build configuration list for PBXProject "ImgProc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C99999C14D8CA9C00451D60 /* Debug */,
+				1C99999D14D8CA9C00451D60 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1C99999E14D8CA9C00451D60 /* Build configuration list for PBXNativeTarget "ImgProc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C99999F14D8CA9C00451D60 /* Debug */,
+				1C9999A014D8CA9C00451D60 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1C99997D14D8CA9B00451D60 /* Project object */;
+}
