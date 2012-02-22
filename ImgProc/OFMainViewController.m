@@ -13,7 +13,7 @@
 @synthesize _scrollView, _navController;
 
 
-const CGFloat kScrollViewHeight = 110.0;
+const CGFloat kScrollViewHeight = 94.0;
 const NSUInteger kNumImages	= 5;
 const NSUInteger kSpaceBetweenButtons = 16;
 
@@ -30,14 +30,15 @@ const NSUInteger kSpaceBetweenButtons = 16;
 
 
 #pragma mark - View lifecycle
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
-    UIBarButtonItem *photoSelectionButton = [[UIBarButtonItem alloc] initWithTitle:@"Open"
-                                                                             style:UIBarButtonItemStylePlain 
-                                                                            target:self
-                                                                            action:@selector(openPhotoAS:)];
+    
+    UIBarButtonItem *photoSelectionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera 
+                                                                                          target:self
+                                                                                          action:@selector(openPhotoAS:)];
     self.navigationItem.leftBarButtonItem = photoSelectionButton;
     [photoSelectionButton release];
     
@@ -120,6 +121,7 @@ const NSUInteger kSpaceBetweenButtons = 16;
 
 
 #pragma mark - ScrollView Methods
+
 - (void)layoutScrollImages
 {
 	UIButton *button = nil;
@@ -153,13 +155,14 @@ const NSUInteger kSpaceBetweenButtons = 16;
 
 
 #pragma mark - NavigationBar Buttons Methods
+
 - (void)openPhotoAS:(id)sender
 {
 	UIActionSheet *photoAS = [[UIActionSheet alloc] initWithTitle:@""
                                                          delegate:self 
                                                 cancelButtonTitle:@"Cancel"
                                            destructiveButtonTitle:nil
-                                                otherButtonTitles:@"Camera",@"Photo Library",nil,nil];
+                                                otherButtonTitles:@"Take a Photo",@"Photo Library",@"Record a Video",nil,nil];
 
     // mark A.S. tag so actionSheet:clickedButtonAtIndex:
     // method can identify which functionality to perform
@@ -193,9 +196,10 @@ const NSUInteger kSpaceBetweenButtons = 16;
 
 
 #pragma mark - UIActionSheetDelegate
+
 - (void)actionSheet:(UIActionSheet *)modalView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    // if selecting a photo or video
+    // if opening a photo or video
     if (modalView.tag == 0)
     {
         switch (buttonIndex)
@@ -205,6 +209,8 @@ const NSUInteger kSpaceBetweenButtons = 16;
                 NSLog(@"Case 0 pressed");
                 [self startCameraControllerFromViewController:self 
                                                 usingDelegate:self];
+                // hide the status bar. might not be necessary but just to be safe:
+                [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
                 break;
             }
             case 1:
@@ -212,6 +218,16 @@ const NSUInteger kSpaceBetweenButtons = 16;
                 NSLog(@"Case 1 pressed");
                 [self startMediaBrowserFromViewController:self
                                             usingDelegate:self];
+                // hide the status bar. might not be necessary but just to be safe:
+                [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
+                break;
+            }
+            case 2:
+            {
+                NSLog(@"Case 2 pressed");
+                [self startMovieControllerFromViewController:self
+                                               usingDelegate:self];
+                // hide the status bar. might not be necessary but just to be safe:
                 [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
                 break;
             }
@@ -240,6 +256,7 @@ const NSUInteger kSpaceBetweenButtons = 16;
 
 
 #pragma mark - Photo and Video Action Sheet Button Functionality
+
 - (BOOL)startCameraControllerFromViewController: (UIViewController*) controller
                                    usingDelegate: (id <UIImagePickerControllerDelegate,
                                                    UINavigationControllerDelegate>) delegate {
@@ -256,9 +273,11 @@ const NSUInteger kSpaceBetweenButtons = 16;
     
     // Displays a control that allows the user to choose picture or
     // movie capture, if both are available:
-    cameraUI.mediaTypes =
-    [UIImagePickerController availableMediaTypesForSourceType:
-     UIImagePickerControllerSourceTypeCamera];
+    cameraUI.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeImage, nil];
+    
+    //cameraUI.mediaTypes =
+    //[UIImagePickerController availableMediaTypesForSourceType:
+    //UIImagePickerControllerSourceTypeCamera];
     
     // Hides the controls for moving & scaling pictures, or for
     // trimming movies. To instead show the controls, use YES.
@@ -269,6 +288,41 @@ const NSUInteger kSpaceBetweenButtons = 16;
     [controller presentModalViewController: cameraUI animated: YES];
     return YES;
 }
+
+
+
+- (BOOL)startMovieControllerFromViewController: (UIViewController*) controller
+                                 usingDelegate: (id <UIImagePickerControllerDelegate,
+                                                  UINavigationControllerDelegate>) delegate {
+    
+    if (([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO)
+        || (delegate == nil)
+        || (controller == nil)) {
+        return NO;
+    }
+    
+    
+    UIImagePickerController *cameraUI = [[UIImagePickerController alloc] init];
+    cameraUI.sourceType = UIImagePickerControllerSourceTypeCamera;
+    
+    // Displays a control that allows the user to choose picture or
+    // movie capture, if both are available:
+    cameraUI.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeMovie, nil];
+    
+    //cameraUI.mediaTypes =
+    //[UIImagePickerController availableMediaTypesForSourceType:
+    //UIImagePickerControllerSourceTypeCamera];
+    
+    // Hides the controls for moving & scaling pictures, or for
+    // trimming movies. To instead show the controls, use YES.
+    cameraUI.allowsEditing = NO;
+    
+    cameraUI.delegate = delegate;
+    
+    [controller presentModalViewController: cameraUI animated: YES];
+    return YES;
+}
+
 
 
 - (BOOL)startMediaBrowserFromViewController: (UIViewController*) controller
@@ -304,10 +358,43 @@ const NSUInteger kSpaceBetweenButtons = 16;
 
 
 #pragma mark - UIImagePickerControllerDelegate methods
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
-{
-    NSLog(@"YOU HAVE PICKED AN IMAGE YO!");
+
+- (void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    
+    NSString *mediaType = [info objectForKey: UIImagePickerControllerMediaType];
+    UIImage *originalImage, *editedImage, *imageToUse;
+    
+    // Handle a still image picked taken with camera or picked from a photo album
+    if (CFStringCompare ((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
+        
+        editedImage   = (UIImage *) [info objectForKey:UIImagePickerControllerEditedImage];
+        originalImage = (UIImage *) [info objectForKey:UIImagePickerControllerOriginalImage];
+        
+        if (editedImage) {
+            imageToUse = editedImage;
+        } else {
+            imageToUse = originalImage;
+        }
+        
+        NSLog(@"You have a taken or selected a photo.");
+        // Do something with imageToUse
+    }
+    
+    // Handle a movied picked from a photo album
+    if (CFStringCompare ((CFStringRef) mediaType, kUTTypeMovie, 0) == kCFCompareEqualTo) {
+        
+        NSLog(@"You have a recorded a video.");
+        
+        NSString *moviePath = [[info objectForKey:UIImagePickerControllerMediaURL] path];
+        
+        // Do something with the picked movie available at moviePath
+    }
+    
+    [[picker parentViewController] dismissModalViewControllerAnimated: YES];
+    [picker release];
 }
+
+
 
 
 // For responding to the user tapping Cancel whether in the camera or photo library.

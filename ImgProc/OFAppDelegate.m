@@ -36,6 +36,7 @@
     
     _navController = [[UINavigationController alloc] initWithRootViewController:_algorithmScrollView];
     [_navController.navigationBar setTintColor:[UIColor blackColor]];
+    [_navController.navigationBar.topItem setTitle:@"Image Processing"];
 
     [self.window addSubview:_navController.view];
     [self.window makeKeyAndVisible];
