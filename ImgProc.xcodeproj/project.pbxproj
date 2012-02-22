@@ -7,25 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C29827614DE1AA900CEA796 /* monotone_close_exit_delete_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 1C29827514DE1AA900CEA796 /* monotone_close_exit_delete_small.png */; };
+		1C29827A14DE200400CEA796 /* algo-demo-1.psd in Resources */ = {isa = PBXBuildFile; fileRef = 1C29827814DE200400CEA796 /* algo-demo-1.psd */; };
+		1C29827B14DE200400CEA796 /* algo-demo-1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1C29827914DE200400CEA796 /* algo-demo-1.png */; };
 		1C99998B14D8CA9C00451D60 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C99998A14D8CA9C00451D60 /* UIKit.framework */; };
 		1C99998D14D8CA9C00451D60 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C99998C14D8CA9C00451D60 /* Foundation.framework */; };
 		1C99998F14D8CA9C00451D60 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C99998E14D8CA9C00451D60 /* CoreGraphics.framework */; };
 		1C99999514D8CA9C00451D60 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1C99999314D8CA9C00451D60 /* InfoPlist.strings */; };
 		1C99999714D8CA9C00451D60 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C99999614D8CA9C00451D60 /* main.m */; };
 		1C99999B14D8CA9C00451D60 /* OFAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C99999A14D8CA9C00451D60 /* OFAppDelegate.m */; };
+		1C9999A314D8CB9800451D60 /* OFMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C9999A214D8CB9800451D60 /* OFMainViewController.m */; };
+		1C9999B114D8D5D200451D60 /* paris.png in Resources */ = {isa = PBXBuildFile; fileRef = 1C9999B014D8D5D200451D60 /* paris.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C29827514DE1AA900CEA796 /* monotone_close_exit_delete_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = monotone_close_exit_delete_small.png; sourceTree = "<group>"; };
+		1C29827814DE200400CEA796 /* algo-demo-1.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = "algo-demo-1.psd"; sourceTree = "<group>"; };
+		1C29827914DE200400CEA796 /* algo-demo-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "algo-demo-1.png"; sourceTree = "<group>"; };
 		1C99998614D8CA9C00451D60 /* ImgProc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImgProc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C99998A14D8CA9C00451D60 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		1C99998C14D8CA9C00451D60 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1C99998E14D8CA9C00451D60 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		1C99999214D8CA9C00451D60 /* ImgProc-Info.plist */ = {isa = PBXFileReference; path = "ImgProc-Info.plist"; sourceTree = "<group>"; };
+		1C99999214D8CA9C00451D60 /* ImgProc-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ImgProc-Info.plist"; sourceTree = "<group>"; };
 		1C99999414D8CA9C00451D60 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1C99999614D8CA9C00451D60 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		1C99999814D8CA9C00451D60 /* ImgProc-Prefix.pch */ = {isa = PBXFileReference; path = "ImgProc-Prefix.pch"; sourceTree = "<group>"; };
-		1C99999914D8CA9C00451D60 /* OFAppDelegate.h */ = {isa = PBXFileReference; path = OFAppDelegate.h; sourceTree = "<group>"; };
+		1C99999814D8CA9C00451D60 /* ImgProc-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ImgProc-Prefix.pch"; sourceTree = "<group>"; };
+		1C99999914D8CA9C00451D60 /* OFAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OFAppDelegate.h; sourceTree = "<group>"; };
 		1C99999A14D8CA9C00451D60 /* OFAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OFAppDelegate.m; sourceTree = "<group>"; };
+		1C9999A114D8CB9800451D60 /* OFMainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OFMainViewController.h; sourceTree = "<group>"; };
+		1C9999A214D8CB9800451D60 /* OFMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OFMainViewController.m; sourceTree = "<group>"; };
+		1C9999B014D8D5D200451D60 /* paris.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = paris.png; path = ImgProc/paris.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +56,7 @@
 		1C99997B14D8CA9B00451D60 = {
 			isa = PBXGroup;
 			children = (
+				1C9999B314D8F62800451D60 /* Resources */,
 				1C99999014D8CA9C00451D60 /* ImgProc */,
 				1C99998914D8CA9C00451D60 /* Frameworks */,
 				1C99998714D8CA9C00451D60 /* Products */,
@@ -74,6 +86,8 @@
 			children = (
 				1C99999914D8CA9C00451D60 /* OFAppDelegate.h */,
 				1C99999A14D8CA9C00451D60 /* OFAppDelegate.m */,
+				1C9999A114D8CB9800451D60 /* OFMainViewController.h */,
+				1C9999A214D8CB9800451D60 /* OFMainViewController.m */,
 				1C99999114D8CA9C00451D60 /* Supporting Files */,
 			);
 			path = ImgProc;
@@ -88,6 +102,17 @@
 				1C99999814D8CA9C00451D60 /* ImgProc-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1C9999B314D8F62800451D60 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1C29827814DE200400CEA796 /* algo-demo-1.psd */,
+				1C29827914DE200400CEA796 /* algo-demo-1.png */,
+				1C29827514DE1AA900CEA796 /* monotone_close_exit_delete_small.png */,
+				1C9999B014D8D5D200451D60 /* paris.png */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -142,6 +167,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1C99999514D8CA9C00451D60 /* InfoPlist.strings in Resources */,
+				1C9999B114D8D5D200451D60 /* paris.png in Resources */,
+				1C29827614DE1AA900CEA796 /* monotone_close_exit_delete_small.png in Resources */,
+				1C29827A14DE200400CEA796 /* algo-demo-1.psd in Resources */,
+				1C29827B14DE200400CEA796 /* algo-demo-1.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,6 +183,7 @@
 			files = (
 				1C99999714D8CA9C00451D60 /* main.m in Sources */,
 				1C99999B14D8CA9C00451D60 /* OFAppDelegate.m in Sources */,
+				1C9999A314D8CB9800451D60 /* OFMainViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +287,7 @@
 				1C9999A014D8CA9C00451D60 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

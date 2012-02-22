@@ -7,9 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "OFMainViewController.h"
 
 @interface OFAppDelegate : UIResponder <UIApplicationDelegate>
+{
+    OFMainViewController *_algorithmScrollView;
+    UINavigationController *_navController;
+}
 
 @property (strong, nonatomic) UIWindow *window;
+@property (nonatomic, retain) OFMainViewController *_algorithmScrollView;
+@property (nonatomic, retain) UINavigationController *_navController;
+
 
 @end

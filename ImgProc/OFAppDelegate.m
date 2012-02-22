@@ -12,19 +12,33 @@
 
 @synthesize window = _window;
 
+@synthesize _algorithmScrollView, _navController;
+
 - (void)dealloc
 {
+    [_algorithmScrollView release];
+    
     [_window release];
     [super dealloc];
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+
+- (void)applicationDidFinishLaunching:(UIApplication *)application
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-    // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
+    
+    // hide status bar
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
+    [UIApplication sharedApplication].keyWindow.frame=CGRectMake(0, 0, 320, 480);
+    
+    _algorithmScrollView = [[OFMainViewController alloc] init];
+    
+    _navController = [[UINavigationController alloc] initWithRootViewController:_algorithmScrollView];
+    [_navController.navigationBar setTintColor:[UIColor blackColor]];
+
+    [self.window addSubview:_navController.view];
     [self.window makeKeyAndVisible];
-    return YES;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
