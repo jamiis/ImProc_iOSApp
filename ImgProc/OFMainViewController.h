@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
+#import "OFMainPhotoView.h"
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 
@@ -13,10 +14,12 @@
 {
     UIScrollView *_scrollView;
     UINavigationController *_navController;
+    OFMainPhotoView *_photoView;
 }
 
 @property (nonatomic, retain) UIScrollView *_scrollView;
 @property (nonatomic, retain) UINavigationController *_navController;
+@property (nonatomic, retain) OFMainPhotoView *_photoView;
 
 - (void)layoutScrollImages;
 - (void)scrollViewButtonPressed;

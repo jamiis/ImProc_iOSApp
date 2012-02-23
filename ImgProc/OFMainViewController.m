@@ -10,7 +10,7 @@
 
 @implementation OFMainViewController
 
-@synthesize _scrollView, _navController;
+@synthesize _scrollView, _navController, _photoView;
 
 
 const CGFloat kScrollViewHeight = 94.0;
@@ -35,7 +35,7 @@ const NSUInteger kSpaceBetweenButtons = 16;
 {
     [super viewDidLoad];
     
-    
+    // button on NavigationBar to take/upload a photo/video
     UIBarButtonItem *photoSelectionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera 
                                                                                           target:self
                                                                                           action:@selector(openPhotoAS:)];
@@ -43,17 +43,20 @@ const NSUInteger kSpaceBetweenButtons = 16;
     [photoSelectionButton release];
     
     
-    UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction 
+    // 'action' button on right side of NavigationBar to perform action 
+    // (e.g. save photo to library, post to facebook, etc.)
+    UIBarButtonItem *actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction 
                                                                             target:self 
                                                                             action:@selector(openActionAS:)];
     
-    self.navigationItem.rightBarButtonItem = settingsButton;
-    [settingsButton release];
+    self.navigationItem.rightBarButtonItem = actionButton;
+    [actionButton release];
     
-    // setup general view
+    // setup background view of app
     self.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
     
-    // setup the scrollview add it to the view controller
+    // setup and configure the scrollview at the bottom of the app
+    // the scrollview holds all the img processing algorithm buttons
     _scrollView = [[UIScrollView alloc] init];
     [_scrollView setBackgroundColor:[UIColor scrollViewTexturedBackgroundColor]];
 	[_scrollView setCanCancelContentTouches:NO];
@@ -64,7 +67,7 @@ const NSUInteger kSpaceBetweenButtons = 16;
     [_scrollView setShowsHorizontalScrollIndicator:NO];
     [_scrollView setShowsVerticalScrollIndicator:NO];
     
-    // load all the images from our bundle and add them to the scroll view
+    // load all the images for the algorithm button and add them to the scroll view
 	NSUInteger i;
 	for (i = 1; i <= kNumImages; i++)
 	{
@@ -80,10 +83,18 @@ const NSUInteger kSpaceBetweenButtons = 16;
         [_scrollView addSubview:button];
 	}
     
-    [self layoutScrollImages];	// now place the photos in serial layout within the scrollview
+    // now place the photos in the scrollview, sequentialy and evenly spaced
+    [self layoutScrollImages];
     
+    // add the scrollview to this viewcontroller's view
     [self.view addSubview:_scrollView];
     [_scrollView release];
+    
+    // allocate a custom UIView for _photoView, the holder of the photo being processed
+    // set the initial example image
+    _photoView = [[OFMainPhotoView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [self.view addSubview:_photoView];
+    [_photoView release];
 }
 
 
@@ -91,10 +102,31 @@ const NSUInteger kSpaceBetweenButtons = 16;
 {
     [super viewWillAppear:animated];
     
+    // bounds of the view. note: self.view.bounds is not correct until this point. it changes after viewDidLoad:
+    CGRect bounds = self.view.bounds;
+    
+    
+    // _scrollView config //
     // set the scrollView's position. 
-    // this is done here instead of viewDidLoad because self.view.bounds isn't correct until this pt.
-    float scrollPosY = self.view.bounds.size.height - kScrollViewHeight;
-    _scrollView.frame = CGRectMake(0.0, scrollPosY, self.view.bounds.size.width, kScrollViewHeight);
+    float scrollPosY = bounds.size.height - kScrollViewHeight;
+    _scrollView.frame = CGRectMake(0.0, scrollPosY, bounds.size.width, kScrollViewHeight);
+    
+    
+    // _photoView config //
+    // position the photoView, the view that holds the photo being processed
+    float photoViewXPos = 20.0;
+    float photoViewYPos = 40.0;
+    float photoViewWidth = bounds.size.width - 2*photoViewXPos;
+    float photoViewHeight = 200;
+    _photoView.frame = CGRectMake(photoViewXPos, photoViewYPos, photoViewWidth, photoViewHeight);
+    
+    // set the background color of the photoView
+    _photoView.backgroundColor = [UIColor whiteColor];
+
+    // set the photoView's originalImage to our example image 
+    // (done here because the frame of the UIView is now correct)
+    UIImageView *exampleImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"paris.png"]];
+    [_photoView setOriginalImageView:exampleImageView];
 }
 
 
@@ -381,15 +413,15 @@ const NSUInteger kSpaceBetweenButtons = 16;
     }
     
     // Handle a movied picked from a photo album
-    if (CFStringCompare ((CFStringRef) mediaType, kUTTypeMovie, 0) == kCFCompareEqualTo) {
+    else if (CFStringCompare ((CFStringRef) mediaType, kUTTypeMovie, 0) == kCFCompareEqualTo) {
         
         NSLog(@"You have a recorded a video.");
         
         NSString *moviePath = [[info objectForKey:UIImagePickerControllerMediaURL] path];
-        
         // Do something with the picked movie available at moviePath
     }
     
+    NSLog(@"attempting to dismiss the image picker view");
     [[picker parentViewController] dismissModalViewControllerAnimated: YES];
     [picker release];
 }
