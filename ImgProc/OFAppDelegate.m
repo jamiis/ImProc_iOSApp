@@ -12,11 +12,11 @@
 
 @synthesize window = _window;
 
-@synthesize _algorithmScrollView, _navController;
+@synthesize _mainViewController, _navController;
 
 - (void)dealloc
 {
-    [_algorithmScrollView release];
+    [_mainViewController release];
     
     [_window release];
     [super dealloc];
@@ -28,12 +28,11 @@
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     
     // hide status bar
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
-    [UIApplication sharedApplication].keyWindow.frame=CGRectMake(0, 0, 320, 480);
+    [OFHelperFunctions hideStatusBar];
     
-    _algorithmScrollView = [[OFMainViewController alloc] init];
+    _mainViewController = [[OFMainViewController alloc] init];
     
-    _navController = [[UINavigationController alloc] initWithRootViewController:_algorithmScrollView];
+    _navController = [[UINavigationController alloc] initWithRootViewController:_mainViewController];
     [_navController.navigationBar setTintColor:[UIColor blackColor]];
     [_navController.navigationBar.topItem setTitle:@"Image Processing"];
 

@@ -8,6 +8,8 @@
 
 #import "OFMainPhotoView.h"
 #import "Constants.h"
+#import "OFHelperFunctions.h"
+#import "OFImageProcHelperFunctions.h"
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 
@@ -23,7 +25,7 @@
 @property (nonatomic, retain) OFMainPhotoView *_photoView;
 
 - (void)layoutScrollImages;
-- (void)scrollViewButtonPressed;
+- (void)scrollViewButtonPressed:(id)sender;
 - (BOOL)startCameraControllerFromViewController: (UIViewController*) controller
                                    usingDelegate: (id <UIImagePickerControllerDelegate,
                                                    UINavigationControllerDelegate>) delegate;

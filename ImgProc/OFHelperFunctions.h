@@ -8,11 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface HelperFunctions : NSObject
+@interface OFHelperFunctions : NSObject
 {
     
 }
 
-- (void) printContentsOfFrame:(CGRect)rect withPrefixString:(NSString*)prefix;
++ (void) printContentsOfFrame:(CGRect)rect withPrefixString:(NSString*)prefix;
++ (void) hideStatusBar;
 
 @end

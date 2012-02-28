@@ -83,20 +83,35 @@ static int imgCount = 0;
     [_scrollView setShowsHorizontalScrollIndicator:NO];
     [_scrollView setShowsVerticalScrollIndicator:NO];
     
-    // load all the images for the algorithm button and add them to the scroll view
+    // load all the images for the algorithm buttons and add them to the scroll view
 	NSUInteger i;
 	for (i = 1; i <= NUM_ALGORITHMS; i++)
 	{
-        // create custom button with image
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        UIImage * buttonImage = [UIImage imageNamed:@"algo-demo-1.png"];
-        // buttonYPos makes sure the button is in the vertical center of the scrollView
-        float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
-        [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
-        [button setImage:buttonImage forState:UIControlStateNormal];
-        [button setTag:i];
-        [button addTarget:self action:@selector(scrollViewButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-        [_scrollView addSubview:button];
+        if (i == 1) {
+            // make grayscale button
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+            UIImage * buttonImage = [UIImage imageNamed:@"grayscale-button.png"];
+            // buttonYPos makes sure the button is in the vertical center of the scrollView
+            float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
+            [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
+            [button setImage:buttonImage forState:UIControlStateNormal];
+            [button setTag:i];
+            [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+            [_scrollView addSubview:button];
+
+        }
+        else {
+            // create custom button with image
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+            UIImage * buttonImage = [UIImage imageNamed:@"algo-demo-1.png"];
+            // buttonYPos makes sure the button is in the vertical center of the scrollView
+            float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
+            [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
+            [button setImage:buttonImage forState:UIControlStateNormal];
+            [button setTag:i];
+            [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+            [_scrollView addSubview:button];
+        }
 	}
     
     // now place the photos in the scrollview, sequentialy and evenly spaced
@@ -109,8 +124,7 @@ static int imgCount = 0;
     [super viewWillAppear:animated];
     
     // make sure the status bar isn't showing
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
-    [UIApplication sharedApplication].keyWindow.frame=CGRectMake(0, 0, 320, 480); 
+    [OFHelperFunctions hideStatusBar];
     
     // bounds of the view. note: self.view.bounds is not correct until this point. it changes after viewDidLoad:
     CGRect bounds = self.view.bounds;
@@ -184,17 +198,27 @@ static int imgCount = 0;
 }
 
 
-- (void)scrollViewButtonPressed
+- (void)scrollViewButtonPressed:(id)sender
 {
-    NSLog(@"ALGORITHM BUTTON PRESSED YAY");
+    UIButton * button = (UIButton *) sender;
     
-    if (imgCount==0){
-        [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
-        imgCount = 1;
+    NSLog(@"algorithm button pressed with tag: %i", button.tag);
+    
+    if (button.tag == 1) {
+        // do grayscale functionality
+        UIImage * grayImage = [OFImageProcHelperFunctions grayscaleImage:[[_photoView getOriginalImageView] image]];
+        [_photoView setOriginalImage:grayImage];
+        
     }
-    else {
-        [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
-        imgCount = 0;
+    else {        
+        if (imgCount==0){
+            [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
+            imgCount = 1;
+        }
+        else {
+            [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
+            imgCount = 0;
+        }
     }
 }
 
@@ -252,36 +276,27 @@ static int imgCount = 0;
         {
             case 0:
             {
-                NSLog(@"Case 0 pressed");
                 [self startCameraControllerFromViewController:self 
                                                 usingDelegate:self];
-                // hide the status bar. might not be necessary but just to be safe:
-                [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
                 break;
             }
             case 1:
             {
-                NSLog(@"Case 1 pressed");
                 [self startMediaBrowserFromViewController:self
                                             usingDelegate:self];
-                // hide the status bar. might not be necessary but just to be safe:
-                [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
                 break;
             }
             case 2:
             {
-                NSLog(@"Case 2 pressed");
                 [self startMovieControllerFromViewController:self
                                                usingDelegate:self];
-                // hide the status bar. might not be necessary but just to be safe:
-                [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
                 break;
             }
         }
     }
     
     // if top-right action button on the uinavigationbar was selected
-    if (modalView.tag == 1)
+    else if (modalView.tag == 1)
     {
         switch (buttonIndex)
         {
@@ -297,6 +312,9 @@ static int imgCount = 0;
             }
         }
     }
+    
+    // hide the status bar. might not be necessary but just to be safe:
+    [OFHelperFunctions hideStatusBar];
 }
 
 
@@ -347,18 +365,13 @@ static int imgCount = 0;
         return NO;
     }
     
-    
     UIImagePickerController *cameraUI = [[UIImagePickerController alloc] init];
     cameraUI.sourceType = UIImagePickerControllerSourceTypeCamera;
     
     // Displays a control that allows the user to choose picture or
     // movie capture, if both are available:
     cameraUI.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeMovie, nil];
-    
-    //cameraUI.mediaTypes =
-    //[UIImagePickerController availableMediaTypesForSourceType:
-    //UIImagePickerControllerSourceTypeCamera];
-    
+        
     // Hides the controls for moving & scaling pictures, or for
     // trimming movies. To instead show the controls, use YES.
     cameraUI.allowsEditing = NO;
@@ -451,11 +464,10 @@ static int imgCount = 0;
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker 
 {
     [self dismissModalViewControllerAnimated: YES];
-    //[picker release];
+    [picker release];
     
     // hide status bar again
-    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
-    [UIApplication sharedApplication].keyWindow.frame=CGRectMake(0, 0, 320, 480); 
+    [OFHelperFunctions hideStatusBar];
 }
 
 

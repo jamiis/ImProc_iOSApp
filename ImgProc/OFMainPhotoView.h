@@ -7,7 +7,7 @@
 //
 
 #import "Constants.h"
-#import "HelperFunctions.h"
+#import "OFHelperFunctions.h"
 #import <UIKit/UIKit.h>
 
 @interface OFMainPhotoView : UIView

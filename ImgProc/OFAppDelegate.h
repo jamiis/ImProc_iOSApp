@@ -11,12 +11,12 @@
 
 @interface OFAppDelegate : UIResponder <UIApplicationDelegate>
 {
-    OFMainViewController *_algorithmScrollView;
+    OFMainViewController *_mainViewController;
     UINavigationController *_navController;
 }
 
 @property (strong, nonatomic) UIWindow *window;
-@property (nonatomic, retain) OFMainViewController *_algorithmScrollView;
+@property (nonatomic, retain) OFMainViewController *_mainViewController;
 @property (nonatomic, retain) UINavigationController *_navController;
 
 
