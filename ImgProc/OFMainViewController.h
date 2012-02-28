@@ -7,6 +7,7 @@
 //
 
 #import "OFMainPhotoView.h"
+#import "Constants.h"
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 

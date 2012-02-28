@@ -6,15 +6,20 @@
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
+#import "Constants.h"
+#import "HelperFunctions.h"
 #import <UIKit/UIKit.h>
 
 @interface OFMainPhotoView : UIView
 {
-    UIImageView *_originalImageView;
-    UIImageView *_editedImageView;
+    
 }
 
-@property (nonatomic, retain) UIImageView *originalImageView;
-@property (nonatomic, retain) UIImageView *editedImageView;
+- (void)setOriginalImage:(UIImage*)image;
+- (void)resizeImageView:(UIImageView*)imgView;
+
+- (UIImageView*)getOriginalImageView;
+- (UIImageView*)getEditedImageView;
+- (void) printContentsOfFrame:(CGRect)rect withPrefixString:(NSString*)prefix;
 
 @end

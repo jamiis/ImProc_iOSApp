@@ -26,7 +26,6 @@
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-    self.window.backgroundColor = [UIColor whiteColor];
     
     // hide status bar
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];

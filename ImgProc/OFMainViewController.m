@@ -12,11 +12,7 @@
 
 @synthesize _scrollView, _navController, _photoView;
 
-
-const CGFloat kScrollViewHeight = 94.0;
-const NSUInteger kNumImages	= 5;
-const NSUInteger kSpaceBetweenButtons = 16;
-
+static int imgCount = 0;
 
 
 - (void)didReceiveMemoryWarning
@@ -31,10 +27,18 @@ const NSUInteger kSpaceBetweenButtons = 16;
 
 #pragma mark - View lifecycle
 
-- (void)viewDidLoad
+- (void)loadView
 {
-    [super viewDidLoad];
+    [super loadView];
     
+    // SCROLL VIEW OF BUTTONS
+    _scrollView = [[UIScrollView alloc] init];
+    // add the scrollview to this viewcontroller's view
+    [self.view addSubview:_scrollView];
+    [_scrollView release];
+    
+    
+    // NAVIGATION BAR BUTTONS
     // button on NavigationBar to take/upload a photo/video
     UIBarButtonItem *photoSelectionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera 
                                                                                           target:self
@@ -42,22 +46,34 @@ const NSUInteger kSpaceBetweenButtons = 16;
     self.navigationItem.leftBarButtonItem = photoSelectionButton;
     [photoSelectionButton release];
     
-    
     // 'action' button on right side of NavigationBar to perform action 
     // (e.g. save photo to library, post to facebook, etc.)
     UIBarButtonItem *actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction 
-                                                                            target:self 
-                                                                            action:@selector(openActionAS:)];
-    
+                                                                                  target:self 
+                                                                                  action:@selector(openActionAS:)];
     self.navigationItem.rightBarButtonItem = actionButton;
     [actionButton release];
+    
+    
+    // PHOTOVIEW -- HOLDS PHOTO BEING EDITED
+    // allocate a custom UIView for _photoView, the holder of the photo being processed
+    _photoView = [[OFMainPhotoView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [self.view addSubview:_photoView];
+    //[_photoView release];
+}
+
+
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
     
     // setup background view of app
     self.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
     
-    // setup and configure the scrollview at the bottom of the app
+    // SCROLL VIEW
+    // configure the scrollview at the bottom of the app
     // the scrollview holds all the img processing algorithm buttons
-    _scrollView = [[UIScrollView alloc] init];
     [_scrollView setBackgroundColor:[UIColor scrollViewTexturedBackgroundColor]];
 	[_scrollView setCanCancelContentTouches:NO];
 	[_scrollView setIndicatorStyle:UIScrollViewIndicatorStyleWhite];
@@ -69,13 +85,13 @@ const NSUInteger kSpaceBetweenButtons = 16;
     
     // load all the images for the algorithm button and add them to the scroll view
 	NSUInteger i;
-	for (i = 1; i <= kNumImages; i++)
+	for (i = 1; i <= NUM_ALGORITHMS; i++)
 	{
         // create custom button with image
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         UIImage * buttonImage = [UIImage imageNamed:@"algo-demo-1.png"];
         // buttonYPos makes sure the button is in the vertical center of the scrollView
-        float buttonYPos = abs((kScrollViewHeight - buttonImage.size.height)/2.0);
+        float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
         [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
         [button setImage:buttonImage forState:UIControlStateNormal];
         [button setTag:i];
@@ -85,16 +101,6 @@ const NSUInteger kSpaceBetweenButtons = 16;
     
     // now place the photos in the scrollview, sequentialy and evenly spaced
     [self layoutScrollImages];
-    
-    // add the scrollview to this viewcontroller's view
-    [self.view addSubview:_scrollView];
-    [_scrollView release];
-    
-    // allocate a custom UIView for _photoView, the holder of the photo being processed
-    // set the initial example image
-    _photoView = [[OFMainPhotoView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [self.view addSubview:_photoView];
-    [_photoView release];
 }
 
 
@@ -102,31 +108,30 @@ const NSUInteger kSpaceBetweenButtons = 16;
 {
     [super viewWillAppear:animated];
     
+    // make sure the status bar isn't showing
+    [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
+    [UIApplication sharedApplication].keyWindow.frame=CGRectMake(0, 0, 320, 480); 
+    
     // bounds of the view. note: self.view.bounds is not correct until this point. it changes after viewDidLoad:
     CGRect bounds = self.view.bounds;
     
+    // SCROLL VIEW
+    float scrollPosY = bounds.size.height - SCROLLVIEW_HEIGHT;
+    _scrollView.frame = CGRectMake(0.0, scrollPosY, bounds.size.width, SCROLLVIEW_HEIGHT);
     
-    // _scrollView config //
-    // set the scrollView's position. 
-    float scrollPosY = bounds.size.height - kScrollViewHeight;
-    _scrollView.frame = CGRectMake(0.0, scrollPosY, bounds.size.width, kScrollViewHeight);
-    
-    
-    // _photoView config //
+    // PHOTO VIEW
     // position the photoView, the view that holds the photo being processed
-    float photoViewXPos = 20.0;
-    float photoViewYPos = 40.0;
-    float photoViewWidth = bounds.size.width - 2*photoViewXPos;
-    float photoViewHeight = 200;
-    _photoView.frame = CGRectMake(photoViewXPos, photoViewYPos, photoViewWidth, photoViewHeight);
+    _photoView.frame = PHOTOVIEW_FRAME;
     
     // set the background color of the photoView
-    _photoView.backgroundColor = [UIColor whiteColor];
-
-    // set the photoView's originalImage to our example image 
-    // (done here because the frame of the UIView is now correct)
-    UIImageView *exampleImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"paris.png"]];
-    [_photoView setOriginalImageView:exampleImageView];
+    _photoView.backgroundColor = [UIColor clearColor];
+    
+    // PHOTO VIEW
+    // set the photoView's originalImage to our example image
+    if ([[_photoView getOriginalImageView] image] == nil) {
+        NSLog(@"setting orignal photo in viewWillAppear to paris.png");
+        [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
+    }
 }
 
 
@@ -166,22 +171,31 @@ const NSUInteger kSpaceBetweenButtons = 16;
 		if ([button isKindOfClass:[UIButton class]] && button.tag > 0)
 		{
 			CGRect frame = button.frame;
-			frame.origin.x = curXLoc + kSpaceBetweenButtons;
+			frame.origin.x = curXLoc + SCROLLVIEW_SPACE_BETWEEN_BUTTONS;
 			button.frame = frame;
 			
             // the next button position is one button's width away plus 2 left & right buffers
-			curXLoc += (button.frame.size.width + 2.0*kSpaceBetweenButtons);
+			curXLoc += (button.frame.size.width + 2.0*SCROLLVIEW_SPACE_BETWEEN_BUTTONS);
 		}
 	}
 	
 	// set the content size so it can be scrollable
-	[_scrollView setContentSize:CGSizeMake(curXLoc, kScrollViewHeight)];
+	[_scrollView setContentSize:CGSizeMake(curXLoc, SCROLLVIEW_HEIGHT)];
 }
 
 
 - (void)scrollViewButtonPressed
 {
     NSLog(@"ALGORITHM BUTTON PRESSED YAY");
+    
+    if (imgCount==0){
+        [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
+        imgCount = 1;
+    }
+    else {
+        [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
+        imgCount = 0;
+    }
 }
 
 
@@ -213,7 +227,7 @@ const NSUInteger kSpaceBetweenButtons = 16;
                                                          delegate:self 
                                                 cancelButtonTitle:@"Cancel"
                                            destructiveButtonTitle:nil
-                                                otherButtonTitles:@"Save Photo to Library",@"Kiss Paula",nil,nil];
+                                                otherButtonTitles:@"Save Photo to Library",@"Share on Facebook",nil,nil];
     
     // mark A.S. tag so actionSheet:clickedButtonAtIndex:
     // method can identify which functionality to perform
@@ -273,12 +287,12 @@ const NSUInteger kSpaceBetweenButtons = 16;
         {
             case 0:
             {
-                NSLog(@"top-right action sheet was selected, button case 0");
+                NSLog(@"Save to Photo Library!");
                 break;
             }
             case 1:
             {
-                NSLog(@"You can kiss Paula now!");
+                NSLog(@"Share with Facebook!");
                 break;
             }
         }
@@ -396,7 +410,7 @@ const NSUInteger kSpaceBetweenButtons = 16;
     NSString *mediaType = [info objectForKey: UIImagePickerControllerMediaType];
     UIImage *originalImage, *editedImage, *imageToUse;
     
-    // Handle a still image picked taken with camera or picked from a photo album
+    // Handle a still image taken with camera or picked from a photo album
     if (CFStringCompare ((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
         
         editedImage   = (UIImage *) [info objectForKey:UIImagePickerControllerEditedImage];
@@ -408,8 +422,16 @@ const NSUInteger kSpaceBetweenButtons = 16;
             imageToUse = originalImage;
         }
         
-        NSLog(@"You have a taken or selected a photo.");
+        // dismiss the the modal view BEFORE setting the photo
+        NSLog(@"dismissing view.");
+        [self dismissModalViewControllerAnimated: YES];
+        [picker release];
+        
         // Do something with imageToUse
+        [_photoView setOriginalImage:imageToUse];
+        
+        NSLog(@"photoView.origView.image = %@", [[[_photoView getOriginalImageView] image] description]);
+        NSLog(@"\n");
     }
     
     // Handle a movied picked from a photo album
@@ -420,10 +442,6 @@ const NSUInteger kSpaceBetweenButtons = 16;
         NSString *moviePath = [[info objectForKey:UIImagePickerControllerMediaURL] path];
         // Do something with the picked movie available at moviePath
     }
-    
-    NSLog(@"attempting to dismiss the image picker view");
-    [[picker parentViewController] dismissModalViewControllerAnimated: YES];
-    [picker release];
 }
 
 
@@ -433,7 +451,8 @@ const NSUInteger kSpaceBetweenButtons = 16;
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker 
 {
     [self dismissModalViewControllerAnimated: YES];
-    [picker release];
+    //[picker release];
+    
     // hide status bar again
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
     [UIApplication sharedApplication].keyWindow.frame=CGRectMake(0, 0, 320, 480); 
