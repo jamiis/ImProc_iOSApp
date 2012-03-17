@@ -10,7 +10,7 @@
 
 @implementation OFImageProcHelperFunctions
 
-+ (UIImage *) convertUIImageToShort:(UIImage*)image
++ (unsigned char *) convertUIImageToByteArray:(UIImage*)image
 {
     const int RED = 1;
     const int GREEN = 2;
@@ -24,6 +24,7 @@
     
     // the pixels will be painted to this array
     uint32_t *pixels = (uint32_t *) malloc(width * height * sizeof(uint32_t));
+    unsigned char * grayPixels = (unsigned char *) malloc(width * height * sizeof(uint32_t));
     
     // clear the pixels so any transparency is preserved
     memset(pixels, 0, width * height * sizeof(uint32_t));
@@ -39,40 +40,17 @@
     
     for(int x = 0; x < width; x++) {
         for(int y = 0; y < height; y++) {
-            //unsigned short * rgbaPixel = (unsigned short*) &pixels[y * width + x];
-            uint8_t *rgbaPixel = (uint8_t *) &pixels[y * width + x];
+            unsigned char * rgbaPixel = (unsigned char*) &pixels[y * width + x];
+            //uint8_t *rgbaPixel = (uint8_t *) &pixels[y * width + x];
             
             // convert to grayscale using recommended method: http://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
-            uint32_t gray = 0.3 * rgbaPixel[RED] + 0.59 * rgbaPixel[GREEN] + 0.11 * rgbaPixel[BLUE];
+            unsigned char gray = (unsigned char) (0.3 * rgbaPixel[RED] + 0.59 * rgbaPixel[GREEN] + 0.11 * rgbaPixel[BLUE]);
             
-            //NSLog(@"rgbaPixel val: %hu", *rgbaPixel);
-            //NSLog(@"gray value:    %i",   gray);
-            
-            // set the pixels to gray
-            rgbaPixel[RED] = gray;
-            rgbaPixel[GREEN] = gray;
-            rgbaPixel[BLUE] = gray;
+            grayPixels[y * width + x] = gray;
         }
     }
     
-    
-    // create a new CGImageRef from our context with the modified pixels
-    CGImageRef imageRef = CGBitmapContextCreateImage(context);
-    
-    // we're done with the context, color space, and pixels
-    CGContextRelease(context);
-    CGColorSpaceRelease(colorSpace);
-    free(pixels);
-    
-    // make a new UIImage to return
-    UIImage *resultUIImage = [UIImage imageWithCGImage:imageRef
-                                                 scale:image.scale 
-                                           orientation:UIImageOrientationUp];
-    
-    // we're done with image now too
-    CGImageRelease(imageRef);
-    
-    return resultUIImage;
+    return grayPixels;
 }
 
 

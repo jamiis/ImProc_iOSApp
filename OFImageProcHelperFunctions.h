@@ -13,7 +13,7 @@
     
 }
 
-+ (UIImage *) convertUIImageToShort:(UIImage*)image;
++ (unsigned char *) convertUIImageToByteArray:(UIImage*)image;
 + (UIImage *) grayscaleImage:(UIImage*)image;
 
 @end

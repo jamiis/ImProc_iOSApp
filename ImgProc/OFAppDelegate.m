@@ -26,6 +26,7 @@
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+    self.window.backgroundColor = [UIColor viewFlipsideBackgroundColor];
     
     // hide status bar
     [OFHelperFunctions hideStatusBar];
@@ -34,7 +35,7 @@
     
     _navController = [[UINavigationController alloc] initWithRootViewController:_mainViewController];
     [_navController.navigationBar setTintColor:[UIColor blackColor]];
-    [_navController.navigationBar.topItem setTitle:@"Image Processing"];
+    //[_navController.navigationBar.topItem setTitle:@"Image Processing"];
 
     [self.window addSubview:_navController.view];
     [self.window makeKeyAndVisible];

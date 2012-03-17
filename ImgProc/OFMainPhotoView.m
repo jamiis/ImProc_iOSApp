@@ -10,6 +10,12 @@
 
 @implementation OFMainPhotoView
 
+@synthesize delegate = _delegate, 
+            isInAlgorithmView = _isInAlgorithmView, 
+            editedImageView = _editedImageView, 
+            originalImageView = _originalImageView, 
+            originalImageViewBitmap = _originalImageViewBitmap;
+
 const NSInteger kOriginalImageViewTag = 1;
 const NSInteger kEditedImageViewTag = 2;
 
@@ -22,20 +28,20 @@ const float kViewFrameMaxX = 280.0;
     self = [super initWithFrame:frame];
     if (self) 
     {
-        // create an UIImageView to hold the ORIGINAL image
-        UIImageView *originalImageView = [[UIImageView alloc] init];
-        originalImageView.tag = kOriginalImageViewTag;
-        originalImageView.contentMode = UIViewContentModeScaleAspectFit;
-        originalImageView.center = self.center;
+        _isInAlgorithmView = FALSE;
         
-        [self addSubview:originalImageView];
-        [originalImageView release];
+        // create an UIImageView to hold the ORIGINAL image
+        _originalImageView = [[UIImageView alloc] init];
+        _originalImageView.tag = kOriginalImageViewTag;
+        _originalImageView.contentMode = UIViewContentModeScaleAspectFit;
+        _originalImageView.center = self.center;
+        [self addSubview:_originalImageView];
         
         // create an UIImageView to hold the EDITED image
-        UIImageView *editedImageView = [[UIImageView alloc] init];
-        editedImageView.tag = kEditedImageViewTag;
-        [self addSubview:editedImageView];
-        [editedImageView release];
+        _editedImageView = [[UIImageView alloc] init];
+        _editedImageView.tag = kEditedImageViewTag;
+        [self addSubview:_editedImageView];
+        [_editedImageView release];
     }
     return self;
 }
@@ -44,12 +50,11 @@ const float kViewFrameMaxX = 280.0;
 
 - (void)setOriginalImage:(UIImage*)image
 {
-    // figure out self.view.frame size according to photo size
-    UIImageView *origView = [self getOriginalImageView];
-    NSLog(@"old image description: %@",origView.image.description);
-    origView.image = image;
-    [self resizeImageView:origView];
-    NSLog(@"new image description: %@",origView.image.description);
+    _originalImageView.image = image;
+    [self resizeImageView:_originalImageView];
+    
+    // set originalImageViewBitmap
+    _originalImageViewBitmap = [ImageHelper convertUIImageToBitmapRGBA8:_originalImageView.image];
 }
 
 
@@ -86,11 +91,59 @@ const float kViewFrameMaxX = 280.0;
  
 
 
+#pragma mark - Touch Events
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    if (_isInAlgorithmView) {
+        UITouch *touch = [touches anyObject];
+        
+        // gets the coordinats of the touch with respect to the specified view. 
+        CGPoint touchPoint = [touch locationInView:self];
+        if ([self isInImageView:touchPoint]) {
+            [_delegate animateToMainViewWithTag:0];
+            NSLog(@"I have been touched... and I am ashamed :(");
+        }
+    }
+}
+
+
+
 
 #pragma mark - Helper Functions
-- (UIImageView*)getOriginalImageView { return (UIImageView *)[self viewWithTag:kOriginalImageViewTag]; }
-- (UIImageView*)getEditedImageView { return (UIImageView *)[self viewWithTag:kEditedImageViewTag]; }
 
+/*
+// returns the original image, not the one being edited.
+- (UIImageView *)getOriginalImageView { 
+    return (UIImageView *)[self viewWithTag:kOriginalImageViewTag]; 
+}
+*/
+
+
+// returns the image that is being edited
+- (UIImageView *)getEditedImageView 
+{ 
+    return (UIImageView *)[self viewWithTag:kEditedImageViewTag]; 
+}
+
+
+// checks to see if a point lies within the image being displayed in this UIView (ie. self)
+- (BOOL)isInImageView:(CGPoint) point
+{
+    int width  = _originalImageView.frame.size.width;
+    int height = _originalImageView.frame.size.height;
+    int x = _originalImageView.frame.origin.x;
+    int y = _originalImageView.frame.origin.y;
+    
+    if (point.x < x || point.x > x + width || point.y < y || point.y > y + height) {
+        return FALSE;
+    }
+    else {
+        return TRUE;
+    }
+}
+
+
+// simple helper function to print the contents of a frame combined with some prefix
 - (void) printContentsOfFrame:(CGRect)rect withPrefixString:(NSString*)prefix
 {
     NSString* printStr = [prefix stringByAppendingString:@" ==> x: %3.2f, y: %3.2f, w: %3.2f, h: %3.2f"];
@@ -99,13 +152,5 @@ const float kViewFrameMaxX = 280.0;
     NSLog(printStr, origOrig.x, origOrig.y, origSize.width, origSize.height);
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 @end

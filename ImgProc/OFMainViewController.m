@@ -10,7 +10,7 @@
 
 @implementation OFMainViewController
 
-@synthesize _scrollView, _navController, _photoView;
+@synthesize _scrollView, _navController, _photoView, _algorithmControlsView;
 
 static int imgCount = 0;
 
@@ -58,8 +58,8 @@ static int imgCount = 0;
     // PHOTOVIEW -- HOLDS PHOTO BEING EDITED
     // allocate a custom UIView for _photoView, the holder of the photo being processed
     _photoView = [[OFMainPhotoView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [_photoView setDelegate:self];
     [self.view addSubview:_photoView];
-    //[_photoView release];
 }
 
 
@@ -69,7 +69,7 @@ static int imgCount = 0;
     [super viewDidLoad];
     
     // setup background view of app
-    self.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
+    self.view.backgroundColor = [UIColor clearColor];
     
     // SCROLL VIEW
     // configure the scrollview at the bottom of the app
@@ -100,6 +100,19 @@ static int imgCount = 0;
             [_scrollView addSubview:button];
 
         }
+        else if (i == 2) {
+            // make grayscale button
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+            UIImage * buttonImage = [UIImage imageNamed:@"invert-button.png"];
+            // buttonYPos makes sure the button is in the vertical center of the scrollView
+            float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
+            [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
+            [button setImage:buttonImage forState:UIControlStateNormal];
+            [button setTag:i];
+            [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+            [_scrollView addSubview:button];
+            
+        }
         else {
             // create custom button with image
             UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -119,6 +132,7 @@ static int imgCount = 0;
 }
 
 
+
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
@@ -134,19 +148,21 @@ static int imgCount = 0;
     _scrollView.frame = CGRectMake(0.0, scrollPosY, bounds.size.width, SCROLLVIEW_HEIGHT);
     
     // PHOTO VIEW
-    // position the photoView, the view that holds the photo being processed
     _photoView.frame = PHOTOVIEW_FRAME;
-    
-    // set the background color of the photoView
     _photoView.backgroundColor = [UIColor clearColor];
     
-    // PHOTO VIEW
     // set the photoView's originalImage to our example image
-    if ([[_photoView getOriginalImageView] image] == nil) {
+    if (_photoView.originalImageView.image == nil) {
         NSLog(@"setting orignal photo in viewWillAppear to paris.png");
-        [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
+        [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
     }
+    
+    // ALGORITHM VIEW -- Initially hidden
+    _algorithmControlsView = [[OFAlgorithmView alloc] initWithFrame:CGRectMake(0.0, self.view.frame.size.height, 320.0, ALGORITHM_VIEW_HEIGHT)];
+    [_algorithmControlsView setDelegate:self];
+    [self.view addSubview:_algorithmControlsView];
 }
+
 
 
 - (void)viewDidUnload
@@ -156,15 +172,20 @@ static int imgCount = 0;
     // e.g. self.myOutlet = nil;
 }
 
+
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+
+
 - (void)dealloc
 {	
-	[_scrollView release];
+	[_photoView release];
+    [_scrollView release];
 	
 	[super dealloc];
 }
@@ -201,30 +222,148 @@ static int imgCount = 0;
 - (void)scrollViewButtonPressed:(id)sender
 {
     UIButton * button = (UIButton *) sender;
+    int width  = _photoView.originalImageView.image.size.width;
+    int height = _photoView.originalImageView.image.size.height;
     
     NSLog(@"algorithm button pressed with tag: %i", button.tag);
     
-    if (button.tag == 1) {
-        // do grayscale functionality
-        UIImage * grayImage = [OFImageProcHelperFunctions grayscaleImage:[[_photoView getOriginalImageView] image]];
-        [_photoView setOriginalImage:grayImage];
-        
+    // animate to algorithm view
+    [self animateToAlgorithmViewWithTag:button.tag];
+    
+    UIImage *new_img = nil;
+    
+    switch (button.tag) {
+        case 1: // invert
+            _photoView.originalImageViewBitmap = Invert_Pixels(_photoView.originalImageViewBitmap, width, height);
+            new_img = [ImageHelper convertBitmapRGBA8ToUIImage:_photoView.originalImageViewBitmap withWidth:width withHeight:height];
+            break;
+            
+        case 2: // invert
+            _photoView.originalImageViewBitmap = Invert_Pixels(_photoView.originalImageViewBitmap, width, height);
+            new_img = [ImageHelper convertBitmapRGBA8ToUIImage:_photoView.originalImageViewBitmap withWidth:width withHeight:height];
+            break;
+            
+        default:
+            if (imgCount == 0){
+                [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
+                imgCount = 1;
+            }
+            else {
+                [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
+            }    
+            NSLog(@"defaulted in scrollViewbuttonPressed switch method");
+            break;
     }
-    else {        
-        if (imgCount==0){
-            [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
-            imgCount = 1;
-        }
-        else {
-            [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
-            imgCount = 0;
-        }
-    }
+    
+    if (new_img != nil)
+        [_photoView setOriginalImage:new_img];
+    else
+        NSLog(@"new_img is nil");
+
+    // cleanup
+    /*if(bitmap) {
+     free(bitmap);	
+     bitmap = NULL;
+     }*/
 }
 
 
 
-#pragma mark - NavigationBar Buttons Methods
+#pragma mark - Animations
+- (void) animateToAlgorithmViewWithTag:(int)tag
+{
+    // set the photoView to be touchable
+    _photoView.isInAlgorithmView = TRUE;
+    
+    // BEGIN ANIMATION
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:0.3];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+    
+    // ALGORITHM CONTROLS
+    [self.view bringSubviewToFront:_algorithmControlsView];
+    float f_y = self.view.frame.size.height - ALGORITHM_VIEW_HEIGHT;
+    _algorithmControlsView.frame = CGRectMake(0.0, f_y, 320.0, ALGORITHM_VIEW_HEIGHT);
+        
+    // SCROLLVIEW
+    _scrollView.frame = CGRectMake(_scrollView.frame.origin.x - _scrollView.frame.size.width,
+                                   _scrollView.frame.origin.y, 
+                                   _scrollView.frame.size.width, 
+                                   _scrollView.frame.size.height);
+    
+    // NAVIGATION BAR
+    CGRect navFrame = self.navigationController.navigationBar.frame;
+    self.navigationController.navigationBar.frame = CGRectMake(navFrame.origin.x, 
+                                                               navFrame.origin.y - navFrame.size.height,
+                                                               navFrame.size.width,
+                                                               navFrame.size.height);
+    
+    // PHOTOVIEW
+    // adjust the photoview to be center with the app's main window
+    CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+    float new_center_y = appFrame.size.height/2.0 - (appFrame.size.height - self.view.frame.size.height);
+    _photoView.center = CGPointMake(_photoView.center.x, new_center_y);
+    
+    NSLog(@"animating to algorithm view");
+    [UIView commitAnimations];
+}
+
+
+
+- (void) animateToMainViewWithTag:(int)tag
+{
+    // set photoView to not except touches
+    _photoView.isInAlgorithmView = FALSE;
+    
+    // animate back to main view
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:0.3];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+    
+    // ALGORITHM CONTROLS
+    _algorithmControlsView.frame = CGRectMake(0.0, self.view.frame.size.height, 320.0, ALGORITHM_VIEW_HEIGHT);
+    
+    // SCROLLVIEW
+    [self.view bringSubviewToFront:_scrollView];
+    _scrollView.frame = CGRectMake(_scrollView.frame.origin.x + _scrollView.frame.size.width,
+                                   _scrollView.frame.origin.y, 
+                                   _scrollView.frame.size.width, 
+                                   _scrollView.frame.size.height);
+    
+    // NAVIGATION BAR
+    CGRect navFrame = self.navigationController.navigationBar.frame;
+    self.navigationController.navigationBar.frame = CGRectMake(navFrame.origin.x, 
+                                                               navFrame.origin.y + navFrame.size.height,
+                                                               navFrame.size.width,
+                                                               navFrame.size.height);
+    
+    // PHOTOVIEW
+    // adjust the photoview to be center with the app's main window
+    _photoView.frame = PHOTOVIEW_FRAME;
+    
+    NSLog(@"animating to main view");
+    [UIView commitAnimations];
+}
+
+
+
+
+#pragma mark - OFAlgorithmViewDelegate methods
+- (void)algorithmViewBackButtonPressed
+{
+    NSLog(@"algo view back button pressed, communicating to delegate");
+    [self animateToMainViewWithTag:0];
+}
+
+- (void)algorithmViewApplyChangesButtonPressed
+{
+    NSLog(@"algoView apply changes button pressed, this is delegate");
+}
+
+
+
+
+#pragma mark - Nav Bar and Action Sheet Methods (UIActionSheetDelegate)
 
 - (void)openPhotoAS:(id)sender
 {
@@ -263,9 +402,6 @@ static int imgCount = 0;
     [actionAS release];
 }
 
-
-
-#pragma mark - UIActionSheetDelegate
 
 - (void)actionSheet:(UIActionSheet *)modalView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
@@ -443,7 +579,7 @@ static int imgCount = 0;
         // Do something with imageToUse
         [_photoView setOriginalImage:imageToUse];
         
-        NSLog(@"photoView.origView.image = %@", [[[_photoView getOriginalImageView] image] description]);
+        NSLog(@"photoView.origView.image = %@", _photoView.originalImageView.image.description);
         NSLog(@"\n");
     }
     

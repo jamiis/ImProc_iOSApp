@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
+extern const CGFloat ALGORITHM_VIEW_HEIGHT;
 extern const CGFloat SCROLLVIEW_HEIGHT;
 extern const NSUInteger NUM_ALGORITHMS;
 extern const NSUInteger SCROLLVIEW_SPACE_BETWEEN_BUTTONS;

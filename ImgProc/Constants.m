@@ -8,6 +8,9 @@
 
 #import "Constants.h"
 
+// ALGORITHM VIEW
+const CGFloat ALGORITHM_VIEW_HEIGHT = 45.0;
+
 // SCROLLVIEW
 const CGFloat SCROLLVIEW_HEIGHT = 94.0;
 const NSUInteger SCROLLVIEW_SPACE_BETWEEN_BUTTONS = 16;
