@@ -26,7 +26,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface ImageHelper : NSObject {
+@interface ImageConverter : NSObject {
 	
 }
 

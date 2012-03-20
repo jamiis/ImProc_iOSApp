@@ -6,33 +6,31 @@
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
-#import "Constants.h"
-#import "OFHelperFunctions.h"
-#import "ImageHelper.h"
 #import <UIKit/UIKit.h>
+#import "ImProc.h"
 
-@class OFMainPhotoView;
+@class OFPhotoView;
 
-
-@protocol OFMainPhotoViewDelegate <NSObject>
+@protocol OFPhotoViewDelegate <NSObject>
 @optional
 @end
 
 
-
-@interface OFMainPhotoView : UIView
+@interface OFPhotoView : UIView
 {
-    id <OFMainPhotoViewDelegate> _delegate;
+    id <OFPhotoViewDelegate> _delegate;
     BOOL _isInAlgorithmView;
     UIImageView *_originalImageView;
     UIImageView *_editedImageView;
-    unsigned char *_originalImageViewBitmap;
+//    unsigned char *_originalImageViewBitmap;
+    pixel* _originalImageViewPixelMap;
 }
-@property (nonatomic, assign) id <OFMainPhotoViewDelegate> delegate;
+@property (nonatomic, assign) id <OFPhotoViewDelegate> delegate;
 @property (nonatomic) BOOL isInAlgorithmView;
 @property (nonatomic, retain) UIImageView *originalImageView;
 @property (nonatomic, retain) UIImageView *editedImageView;
-@property (nonatomic) unsigned char *originalImageViewBitmap;
+//@property (nonatomic) unsigned char *originalImageViewBitmap;
+@property (nonatomic) pixel *originalImageViewPixelMap;
 
 - (void)setOriginalImage:(UIImage*)image;
 - (void)resizeImageView:(UIImageView*)imgView;

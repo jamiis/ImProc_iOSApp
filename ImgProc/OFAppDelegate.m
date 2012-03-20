@@ -7,6 +7,8 @@
 //
 
 #import "OFAppDelegate.h"
+#import "OFHelperFunctions.h"
+#import "OFMainViewController.h"
 
 @implementation OFAppDelegate
 

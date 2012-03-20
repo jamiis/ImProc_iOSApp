@@ -7,10 +7,18 @@
 //
 
 #import "OFMainViewController.h"
+#import "OFHelperFunctions.h"
+#import "ImageConverter.h"
+#import "OFPhotoView.h"
+#import "ImProc.h"
 
 @implementation OFMainViewController
 
-@synthesize _scrollView, _navController, _photoView, _algorithmControlsView;
+@synthesize scrollView = _scrollView, 
+            navController = _navController, 
+            photoView = _photoView, 
+            algorithmControlsView = _algorithmControlsView, 
+            currentAlgorithmTag = _currentAlgorithm;
 
 static int imgCount = 0;
 
@@ -57,8 +65,8 @@ static int imgCount = 0;
     
     // PHOTOVIEW -- HOLDS PHOTO BEING EDITED
     // allocate a custom UIView for _photoView, the holder of the photo being processed
-    _photoView = [[OFMainPhotoView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [_photoView setDelegate:self];
+    _photoView = [[OFPhotoView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    //[_photoView setDelegate:self];
     [self.view addSubview:_photoView];
 }
 
@@ -87,44 +95,38 @@ static int imgCount = 0;
 	NSUInteger i;
 	for (i = 1; i <= NUM_ALGORITHMS; i++)
 	{
-        if (i == 1) {
-            // make grayscale button
-            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-            UIImage * buttonImage = [UIImage imageNamed:@"grayscale-button.png"];
-            // buttonYPos makes sure the button is in the vertical center of the scrollView
-            float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
-            [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
-            [button setImage:buttonImage forState:UIControlStateNormal];
-            [button setTag:i];
-            [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-            [_scrollView addSubview:button];
-
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        
+        // set button image
+        UIImage * buttonImage;
+        switch (i) {
+            case ALGORITHM_CONTRAST_D:
+                buttonImage = [UIImage imageNamed:@"contrast-button.png"];
+                break;
+            case ALGORITHM_INVERT_D:
+                buttonImage = [UIImage imageNamed:@"invert-button.png"];
+                break;
+            case ALGORITHM_BRIGHTNESS_D:
+                buttonImage = [UIImage imageNamed:@"brightness-button.png"];
+                break;
+            case ALGORITHM_THRESHOLD_D:
+                buttonImage = [UIImage imageNamed:@"threshold-button.png"];
+                break;
+            case ALGORITHM_GAMMA_CORR_D:
+                buttonImage = [UIImage imageNamed:@"gamma-button.png"];
+                break;
+            default:
+                buttonImage = [UIImage imageNamed:@"algo-demo-1.png"];
+                break;
         }
-        else if (i == 2) {
-            // make grayscale button
-            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-            UIImage * buttonImage = [UIImage imageNamed:@"invert-button.png"];
-            // buttonYPos makes sure the button is in the vertical center of the scrollView
-            float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
-            [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
-            [button setImage:buttonImage forState:UIControlStateNormal];
-            [button setTag:i];
-            [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-            [_scrollView addSubview:button];
-            
-        }
-        else {
-            // create custom button with image
-            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-            UIImage * buttonImage = [UIImage imageNamed:@"algo-demo-1.png"];
-            // buttonYPos makes sure the button is in the vertical center of the scrollView
-            float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
-            [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
-            [button setImage:buttonImage forState:UIControlStateNormal];
-            [button setTag:i];
-            [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-            [_scrollView addSubview:button];
-        }
+        
+        // buttonYPos makes sure the button is in the vertical center of the scrollView
+        float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
+        [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
+        [button setImage:buttonImage forState:UIControlStateNormal];
+        [button setTag:i];
+        [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [_scrollView addSubview:button];
 	}
     
     // now place the photos in the scrollview, sequentialy and evenly spaced
@@ -158,7 +160,7 @@ static int imgCount = 0;
     }
     
     // ALGORITHM VIEW -- Initially hidden
-    _algorithmControlsView = [[OFAlgorithmView alloc] initWithFrame:CGRectMake(0.0, self.view.frame.size.height, 320.0, ALGORITHM_VIEW_HEIGHT)];
+    _algorithmControlsView = [[OFAlgorithmControlsView alloc] initWithFrame:CGRectMake(0.0, self.view.frame.size.height, 320.0, ALGORITHM_VIEW_HEIGHT)];
     [_algorithmControlsView setDelegate:self];
     [self.view addSubview:_algorithmControlsView];
 }
@@ -233,14 +235,29 @@ static int imgCount = 0;
     UIImage *new_img = nil;
     
     switch (button.tag) {
-        case 1: // invert
-            _photoView.originalImageViewBitmap = Invert_Pixels(_photoView.originalImageViewBitmap, width, height);
-            new_img = [ImageHelper convertBitmapRGBA8ToUIImage:_photoView.originalImageViewBitmap withWidth:width withHeight:height];
+        case ALGORITHM_CONTRAST_D:
+            _photoView.originalImageViewPixelMap = Modify_Contrast_D(_photoView.originalImageViewPixelMap, 2, width, height);
+            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
             break;
             
-        case 2: // invert
-            _photoView.originalImageViewBitmap = Invert_Pixels(_photoView.originalImageViewBitmap, width, height);
-            new_img = [ImageHelper convertBitmapRGBA8ToUIImage:_photoView.originalImageViewBitmap withWidth:width withHeight:height];
+        case ALGORITHM_INVERT_D:
+            _photoView.originalImageViewPixelMap = Invert_Pixels_D(_photoView.originalImageViewPixelMap, width, height);
+            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
+            break;
+            
+        case ALGORITHM_BRIGHTNESS_D:
+            _photoView.originalImageViewPixelMap = Modify_Brightness_D(_photoView.originalImageViewPixelMap, 35, width, height);
+            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
+            break;
+            
+        case ALGORITHM_THRESHOLD_D: // threshold
+            _photoView.originalImageViewPixelMap = Threshold_D(_photoView.originalImageViewPixelMap, 3, width, height);
+            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
+            break;
+            
+        case ALGORITHM_GAMMA_CORR_D: // gamma correction
+            _photoView.originalImageViewPixelMap = Gamma_Corr_D(_photoView.originalImageViewPixelMap, 3, width, height);
+            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
             break;
             
         default:
@@ -250,6 +267,7 @@ static int imgCount = 0;
             }
             else {
                 [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
+                imgCount = 0;
             }    
             NSLog(@"defaulted in scrollViewbuttonPressed switch method");
             break;
@@ -572,7 +590,7 @@ static int imgCount = 0;
         }
         
         // dismiss the the modal view BEFORE setting the photo
-        NSLog(@"dismissing view.");
+        // NSLog(@"dismissing view.");
         [self dismissModalViewControllerAnimated: YES];
         [picker release];
         
@@ -580,7 +598,6 @@ static int imgCount = 0;
         [_photoView setOriginalImage:imageToUse];
         
         NSLog(@"photoView.origView.image = %@", _photoView.originalImageView.image.description);
-        NSLog(@"\n");
     }
     
     // Handle a movied picked from a photo album

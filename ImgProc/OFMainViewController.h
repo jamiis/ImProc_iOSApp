@@ -6,32 +6,30 @@
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
-#import "OFMainPhotoView.h"
 #import "Constants.h"
-#import "OFHelperFunctions.h"
-#import "OFImageProcHelperFunctions.h"
-#import "ImageHelper.h"
-#import "ImProc.h"
-#import "OFAlgorithmView.h"
-
+#import "OFAlgorithmControlsView.h"
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/UTCoreTypes.h>
+@class OFPhotoView;
 
 @interface OFMainViewController : UIViewController <UINavigationBarDelegate, 
                                                     UIActionSheetDelegate, 
                                                     UIImagePickerControllerDelegate,
-                                                    UINavigationControllerDelegate,OFAlgorithmViewDelegate>
+                                                    UINavigationControllerDelegate, 
+                                                    OFAlgorithmControlsViewDelegate>
 {
     UIScrollView *_scrollView;
     UINavigationController *_navController;
-    OFMainPhotoView *_photoView;
-    OFAlgorithmView *_algorithmControlsView;
+    OFPhotoView *_photoView;
+    OFAlgorithmControlsView *_algorithmControlsView;
+    int _currentAlgorithm;
 }
 
-@property (nonatomic, retain) UIScrollView *_scrollView;
-@property (nonatomic, retain) UINavigationController *_navController;
-@property (nonatomic, retain) OFMainPhotoView *_photoView;
-@property (nonatomic, retain) OFAlgorithmView *_algorithmControlsView;
+@property (nonatomic, retain) UIScrollView *scrollView;
+@property (nonatomic, retain) UINavigationController *navController;
+@property (nonatomic, retain) OFPhotoView *photoView;
+@property (nonatomic, retain) OFAlgorithmControlsView *algorithmControlsView;
+@property (nonatomic) int currentAlgorithmTag;
 
 - (void)layoutScrollImages;
 - (void)scrollViewButtonPressed:(id)sender;

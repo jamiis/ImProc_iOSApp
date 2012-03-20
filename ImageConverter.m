@@ -23,10 +23,10 @@
  *
  */
 
-#import "ImageHelper.h"
+#import "ImageConverter.h"
 
 
-@implementation ImageHelper
+@implementation ImageConverter
 
 
 + (unsigned char *) convertUIImageToBitmapRGBA8:(UIImage *) image {

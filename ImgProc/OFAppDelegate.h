@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "OFMainViewController.h"
+@class OFMainViewController;
 
 @interface OFAppDelegate : UIResponder <UIApplicationDelegate>
 {

@@ -6,24 +6,23 @@
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
-#import "Constants.h"
 #import <UIKit/UIKit.h>
 
-@class OFAlgorithmView;
+@class OFAlgorithmControlsView;
 
-@protocol OFAlgorithmViewDelegate <NSObject>
+@protocol OFAlgorithmControlsViewDelegate <NSObject>
 - (void)algorithmViewBackButtonPressed;
 - (void)algorithmViewApplyChangesButtonPressed;
 @optional
 @end
 
-@interface OFAlgorithmView : UIView {
-    id <OFAlgorithmViewDelegate> _delegate;
+@interface OFAlgorithmControlsView : UIView {
+    id <OFAlgorithmControlsViewDelegate> _delegate;
     UIButton *_backButton;
     UIButton *_applyChangesButton;
 }
 
-@property (nonatomic, retain) id <OFAlgorithmViewDelegate> delegate;
+@property (nonatomic, retain) id <OFAlgorithmControlsViewDelegate> delegate;
 @property (nonatomic, retain) UIButton *backButton;
 @property (nonatomic, retain) UIButton *applyChangesButton;
 

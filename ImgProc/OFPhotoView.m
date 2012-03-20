@@ -6,15 +6,19 @@
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
-#import "OFMainPhotoView.h"
+#import "OFPhotoView.h"
+#import "Constants.h"
+#import "OFHelperFunctions.h"
+#import "ImageConverter.h"
 
-@implementation OFMainPhotoView
+@implementation OFPhotoView
 
 @synthesize delegate = _delegate, 
             isInAlgorithmView = _isInAlgorithmView, 
             editedImageView = _editedImageView, 
             originalImageView = _originalImageView, 
-            originalImageViewBitmap = _originalImageViewBitmap;
+//            originalImageViewBitmap = _originalImageViewBitmap,
+            originalImageViewPixelMap = _originalImageViewPixelMap;
 
 const NSInteger kOriginalImageViewTag = 1;
 const NSInteger kEditedImageViewTag = 2;
@@ -54,7 +58,10 @@ const float kViewFrameMaxX = 280.0;
     [self resizeImageView:_originalImageView];
     
     // set originalImageViewBitmap
-    _originalImageViewBitmap = [ImageHelper convertUIImageToBitmapRGBA8:_originalImageView.image];
+//    _originalImageViewBitmap = [ImageConverter convertUIImageToBitmapRGBA8:_originalImageView.image];
+    
+    // set originalImageViewPixelMap
+    _originalImageViewPixelMap = (pixel*)[ImageConverter convertUIImageToBitmapRGBA8:_originalImageView.image];
 }
 
 
@@ -100,7 +107,7 @@ const float kViewFrameMaxX = 280.0;
         // gets the coordinats of the touch with respect to the specified view. 
         CGPoint touchPoint = [touch locationInView:self];
         if ([self isInImageView:touchPoint]) {
-            [_delegate animateToMainViewWithTag:0];
+            //[_delegate animateToMainViewWithTag:0];
             NSLog(@"I have been touched... and I am ashamed :(");
         }
     }

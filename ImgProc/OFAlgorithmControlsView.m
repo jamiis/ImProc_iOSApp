@@ -6,9 +6,11 @@
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
-#import "OFAlgorithmView.h"
+#import "OFAlgorithmControlsView.h"
+#import "OFHelperFunctions.h"
+#import "Constants.h"
 
-@implementation OFAlgorithmView
+@implementation OFAlgorithmControlsView
 
 @synthesize backButton = _backButton, 
             delegate = _delegate, 
@@ -60,6 +62,7 @@
     CGSize  origSize = rect.size;
     NSLog(printStr, origOrig.x, origOrig.y, origSize.width, origSize.height);
 }
+ 
 
 /*
 // Only override drawRect: if you perform custom drawing.

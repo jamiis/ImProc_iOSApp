@@ -57,7 +57,6 @@
 
 
 
-
 + (UIImage *) grayscaleImage:(UIImage*)image
 {
     const int RED = 1;

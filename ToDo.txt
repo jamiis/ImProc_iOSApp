@@ -1,0 +1,12 @@
+
+
+ToDo
+
+Main Objectives:
+    Histogram overlay
+    Educational, algorithm description overlay
+    Finger slider adjustment to algorithms
+    iPad implementation
+    
+Optimizations:
+	* ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height]; in OFMainViewController.m Shouldn't have to caste to (unsigned char*).  convertBitmapRGBA8ToUIImage should just take a pixel*
