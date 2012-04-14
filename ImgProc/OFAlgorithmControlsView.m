@@ -20,19 +20,22 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.backgroundColor = [UIColor grayColor];
+        self.backgroundColor = [UIColor underPageBackgroundColor];
+        
+        float b_height = 30.0;
+        float b_width  = 60.0;
         
         // BACK BUTTON
         _backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-        float b_dim = 30.0;
-        _backButton.frame = CGRectMake(10.0, (self.frame.size.height-b_dim)/2.0, b_dim, b_dim);
+        [_backButton setTitle:@"Back" forState:UIControlStateNormal];
+        _backButton.frame = CGRectMake(10.0, (self.frame.size.height-b_height)/2.0, b_width, b_height);
         [_backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_backButton];
         
         // APPLY CHANGES BUTTON
         _applyChangesButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-        float a_dim = 30.0;
-        _applyChangesButton.frame = CGRectMake((self.frame.size.width-a_dim-10.0), (self.frame.size.height-a_dim)/2.0, a_dim, a_dim);
+        [_applyChangesButton setTitle:@"Apply" forState:UIControlStateNormal];
+        _applyChangesButton.frame = CGRectMake((self.frame.size.width-b_width-10.0), (self.frame.size.height-b_height)/2.0, b_width, b_height);
         [_applyChangesButton addTarget:self action:@selector(applyChangesButtonPressed) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_applyChangesButton];
     }
@@ -63,14 +66,5 @@
     NSLog(printStr, origOrig.x, origOrig.y, origSize.width, origSize.height);
 }
  
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 @end

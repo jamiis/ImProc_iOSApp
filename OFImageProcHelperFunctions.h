@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ImProc.h"
+#import "ImProc_Base.h"
 
 @interface OFImageProcHelperFunctions : NSObject
 {

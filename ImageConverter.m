@@ -77,7 +77,10 @@
 	return newBitmap;	
 }
 
-+ (CGContextRef) newBitmapRGBA8ContextFromImage:(CGImageRef) image {
+
+
++ (CGContextRef) newBitmapRGBA8ContextFromImage:(CGImageRef)image 
+{
 	CGContextRef context = NULL;
 	CGColorSpaceRef colorSpace;
 	uint32_t *bitmapData;
@@ -127,6 +130,8 @@
 	return context;	
 }
 
+
+
 + (UIImage *) convertBitmapRGBA8ToUIImage:(unsigned char *) buffer 
 								withWidth:(int) width
 							   withHeight:(int) height {
@@ -153,8 +158,8 @@
 									bytesPerRow, 
 									colorSpaceRef, 
 									bitmapInfo, 
-									provider,	// data provider
-									NULL,		// decode
+									provider,       // data provider
+									NULL,           // decode
 									YES,			// should interpolate
 									renderingIntent);
 		
@@ -189,15 +194,18 @@
 		CGImageRef imageRef = CGBitmapContextCreateImage(context);
 		
 		// Support both iPad 3.2 and iPhone 4 Retina displays with the correct scale
-		if([UIImage respondsToSelector:@selector(imageWithCGImage:scale:orientation:)]) {
-			float scale = [[UIScreen mainScreen] scale];
-			image = [UIImage imageWithCGImage:imageRef scale:scale orientation:UIImageOrientationUp];
-		} else {
-			image = [UIImage imageWithCGImage:imageRef];
-		}
+//        if([UIImage respondsToSelector:@selector(imageWithCGImage:scale:orientation:)]) {
+//            float scale = [[UIScreen mainScreen] scale];
+//            image = [UIImage imageWithCGImage:imageRef scale:scale orientation:UIImageOrientationUp];
+//		} 
+//        else {
+//            image = [UIImage imageWithCGImage:imageRef];
+//		}
+        
+        image = [UIImage imageWithCGImage:imageRef];
 		
 		CGImageRelease(imageRef);	
-		CGContextRelease(context);	
+		CGContextRelease(context);
 	}
 	
 	CGColorSpaceRelease(colorSpaceRef);

@@ -9,48 +9,47 @@
 #import "OFMainViewController.h"
 #import "OFHelperFunctions.h"
 #import "ImageConverter.h"
-#import "OFPhotoView.h"
-#import "ImProc.h"
+#import "ImProc_Base.h"
+#import "ImProc_Edges.h"
+#import "ImProc_Filters.h"
+#import "UIImage-Extensions.h"
+
+@interface OFMainViewController () {
+    UIActionSheet *_photoAS;
+    UIActionSheet *_actionAS;
+    UIPopoverController *_photoPopoverController;
+}
+- (BOOL)dismissPhotoAS;
+- (BOOL)dismissPhotoPopoverController;
+@end
+
 
 @implementation OFMainViewController
 
-@synthesize scrollView = _scrollView, 
-            navController = _navController, 
-            photoView = _photoView, 
+@synthesize scrollViewController  = _scrollViewController,
+            photoView             = _photoView,
+            liveVideoController   = _liveVideoController,
             algorithmControlsView = _algorithmControlsView, 
-            currentAlgorithmTag = _currentAlgorithm;
-
-static int imgCount = 0;
-
-
-- (void)didReceiveMemoryWarning
-{
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
-}
-
+            algorithmHandler      = _algorithmHandler;
 
 
 #pragma mark - View lifecycle
-
 - (void)loadView
 {
     [super loadView];
     
-    // SCROLL VIEW OF BUTTONS
-    _scrollView = [[UIScrollView alloc] init];
-    // add the scrollview to this viewcontroller's view
-    [self.view addSubview:_scrollView];
-    [_scrollView release];
+    // SCROLL VIEW - holds the algorithm buttons
+    _scrollViewController = [[OFAlgorithmScrollViewController alloc] init];
+    [_scrollViewController setDelegate:self];
+    [self.view addSubview:_scrollViewController.view];
     
     
     // NAVIGATION BAR BUTTONS
     // button on NavigationBar to take/upload a photo/video
-    UIBarButtonItem *photoSelectionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera 
+    UIBarButtonItem *photoSelectionButton = [[UIBarButtonItem alloc] 
+                                             initWithBarButtonSystemItem:UIBarButtonSystemItemCamera 
                                                                                           target:self
-                                                                                          action:@selector(openPhotoAS:)];
+                                                                                    action:@selector(openPhotoAS:)];
     self.navigationItem.leftBarButtonItem = photoSelectionButton;
     [photoSelectionButton release];
     
@@ -66,73 +65,38 @@ static int imgCount = 0;
     // PHOTOVIEW -- HOLDS PHOTO BEING EDITED
     // allocate a custom UIView for _photoView, the holder of the photo being processed
     _photoView = [[OFPhotoView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    //[_photoView setDelegate:self];
     [self.view addSubview:_photoView];
-}
-
-
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
     
-    // setup background view of app
+    // ALGORITHM CONTROLS -- Initially hidden
+    _algorithmControlsView = [[OFAlgorithmControlsView alloc] 
+                              initWithFrame:CGRectMake(0.0, self.view.frame.size.height, self.view.frame.size.width, ALGORITHM_VIEW_HEIGHT)];
+    [_algorithmControlsView setDelegate:self];
+    [self.view addSubview:_algorithmControlsView];
+    
+    
+    // SETUP LIVE VIDEO
+    _liveVideoController = [[OFLiveVideo alloc] init];
+    [_liveVideoController setDelegate:self];
+    [_liveVideoController setupCaptureSession];
+    
+    
+    // SETUP TOUCH INPUT
+    UIPanGestureRecognizer* panRecognizer = [[[UIPanGestureRecognizer alloc] 
+                                              initWithTarget:self action:@selector(adjustAlgorithmInputs:)] autorelease];
+    //[panRecognizer setDelegate:self];
+    [panRecognizer setMaximumNumberOfTouches:1];
+    [panRecognizer setMinimumNumberOfTouches:1];
+    [self.view addGestureRecognizer:panRecognizer];
+    
+    
+    // SETUP ALGORITHM HANDLER
+    _algorithmHandler = [[OFAlgorithmHandler alloc] init];
+    _algorithmHandler.delegate = self;
+    [_algorithmHandler setCurrentAlgorithm:ALGORITHM_NONE];
+    
+    // finally, set the background color of the view
     self.view.backgroundColor = [UIColor clearColor];
-    
-    // SCROLL VIEW
-    // configure the scrollview at the bottom of the app
-    // the scrollview holds all the img processing algorithm buttons
-    [_scrollView setBackgroundColor:[UIColor scrollViewTexturedBackgroundColor]];
-	[_scrollView setCanCancelContentTouches:NO];
-	[_scrollView setIndicatorStyle:UIScrollViewIndicatorStyleWhite];
-	[_scrollView setClipsToBounds:YES];		// default is NO, we want to restrict drawing within our scrollview
-	[_scrollView setScrollEnabled:YES];
-    [_scrollView setContentInset:UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0)];
-    [_scrollView setShowsHorizontalScrollIndicator:NO];
-    [_scrollView setShowsVerticalScrollIndicator:NO];
-    
-    // load all the images for the algorithm buttons and add them to the scroll view
-	NSUInteger i;
-	for (i = 1; i <= NUM_ALGORITHMS; i++)
-	{
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        
-        // set button image
-        UIImage * buttonImage;
-        switch (i) {
-            case ALGORITHM_CONTRAST_D:
-                buttonImage = [UIImage imageNamed:@"contrast-button.png"];
-                break;
-            case ALGORITHM_INVERT_D:
-                buttonImage = [UIImage imageNamed:@"invert-button.png"];
-                break;
-            case ALGORITHM_BRIGHTNESS_D:
-                buttonImage = [UIImage imageNamed:@"brightness-button.png"];
-                break;
-            case ALGORITHM_THRESHOLD_D:
-                buttonImage = [UIImage imageNamed:@"threshold-button.png"];
-                break;
-            case ALGORITHM_GAMMA_CORR_D:
-                buttonImage = [UIImage imageNamed:@"gamma-button.png"];
-                break;
-            default:
-                buttonImage = [UIImage imageNamed:@"algo-demo-1.png"];
-                break;
-        }
-        
-        // buttonYPos makes sure the button is in the vertical center of the scrollView
-        float buttonYPos = abs((SCROLLVIEW_HEIGHT - buttonImage.size.height)/2.0);
-        [button setFrame:CGRectMake(0.0, buttonYPos, buttonImage.size.width, buttonImage.size.height)];
-        [button setImage:buttonImage forState:UIControlStateNormal];
-        [button setTag:i];
-        [button addTarget:self action:@selector(scrollViewButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        [_scrollView addSubview:button];
-	}
-    
-    // now place the photos in the scrollview, sequentialy and evenly spaced
-    [self layoutScrollImages];
 }
-
 
 
 - (void)viewWillAppear:(BOOL)animated
@@ -146,150 +110,126 @@ static int imgCount = 0;
     CGRect bounds = self.view.bounds;
     
     // SCROLL VIEW
-    float scrollPosY = bounds.size.height - SCROLLVIEW_HEIGHT;
-    _scrollView.frame = CGRectMake(0.0, scrollPosY, bounds.size.width, SCROLLVIEW_HEIGHT);
+    // TODO: adapt for ipad and rotated views!!
+    [_scrollViewController resizeInFrame:bounds];
     
     // PHOTO VIEW
-    _photoView.frame = PHOTOVIEW_FRAME;
+    [_photoView resizeGivenBounds:bounds];
     _photoView.backgroundColor = [UIColor clearColor];
     
     // set the photoView's originalImage to our example image
     if (_photoView.originalImageView.image == nil) {
-        NSLog(@"setting orignal photo in viewWillAppear to paris.png");
-        [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
+        [_algorithmHandler processImage:[UIImage imageNamed:@"cassius.jpg"]];
     }
-    
-    // ALGORITHM VIEW -- Initially hidden
-    _algorithmControlsView = [[OFAlgorithmControlsView alloc] initWithFrame:CGRectMake(0.0, self.view.frame.size.height, 320.0, ALGORITHM_VIEW_HEIGHT)];
-    [_algorithmControlsView setDelegate:self];
-    [self.view addSubview:_algorithmControlsView];
 }
-
-
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
-
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-
 
 
 - (void)dealloc
 {	
 	[_photoView release];
-    [_scrollView release];
+    [_liveVideoController release];
+    [_algorithmControlsView release];
+    [_algorithmHandler release];
 	
 	[super dealloc];
 }
 
 
 
-#pragma mark - ScrollView Methods
 
-- (void)layoutScrollImages
+#pragma mark - Rotation
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-	UIButton *button = nil;
-	NSArray *subviews = [_scrollView subviews];
-    
-	// reposition all image subviews in a horizontal serial fashion
-	CGFloat curXLoc = 0;
-	for (button in subviews)
-	{
-		if ([button isKindOfClass:[UIButton class]] && button.tag > 0)
-		{
-			CGRect frame = button.frame;
-			frame.origin.x = curXLoc + SCROLLVIEW_SPACE_BETWEEN_BUTTONS;
-			button.frame = frame;
-			
-            // the next button position is one button's width away plus 2 left & right buffers
-			curXLoc += (button.frame.size.width + 2.0*SCROLLVIEW_SPACE_BETWEEN_BUTTONS);
-		}
-	}
-	
-	// set the content size so it can be scrollable
-	[_scrollView setContentSize:CGSizeMake(curXLoc, SCROLLVIEW_HEIGHT)];
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait ||
+            interfaceOrientation == UIInterfaceOrientationLandscapeLeft ||
+            interfaceOrientation == UIInterfaceOrientationLandscapeRight);
 }
 
 
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation 
+                                         duration:(NSTimeInterval)duration
+{
+    NSLog(@"willAnimateRotationToInterfaceOrientation");    
+}
+
+
+
+
+#pragma mark - OFAlgorithmHandlerDelegate Methods
+- (void)setOriginalImage:(UIImage*)image { [_photoView setOriginalImage:image]; }
+- (void)setEditedImage:(UIImage*)image   { [_photoView setEditedImage:image]; }
+
+
+
+
+#pragma mark - OFLiveVideoDelegate Methods
+- (void)setNewFilteredImage:(UIImage *)image { [_algorithmHandler processImage:[image imageRotatedByDegrees:90.0]]; }
+
+
+
+
+#pragma mark - OFScrollViewControllerDelegate Methods
 - (void)scrollViewButtonPressed:(id)sender
 {
+    // initialize algorithm settings
     UIButton * button = (UIButton *) sender;
-    int width  = _photoView.originalImageView.image.size.width;
-    int height = _photoView.originalImageView.image.size.height;
+    [_algorithmHandler setCurrentAlgorithm:button.tag];
+    [_algorithmHandler setInitialAlpha];
     
-    NSLog(@"algorithm button pressed with tag: %i", button.tag);
-    
-    // animate to algorithm view
-    [self animateToAlgorithmViewWithTag:button.tag];
-    
-    UIImage *new_img = nil;
-    
-    switch (button.tag) {
-        case ALGORITHM_CONTRAST_D:
-            _photoView.originalImageViewPixelMap = Modify_Contrast_D(_photoView.originalImageViewPixelMap, 2, width, height);
-            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
-            break;
-            
-        case ALGORITHM_INVERT_D:
-            _photoView.originalImageViewPixelMap = Invert_Pixels_D(_photoView.originalImageViewPixelMap, width, height);
-            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
-            break;
-            
-        case ALGORITHM_BRIGHTNESS_D:
-            _photoView.originalImageViewPixelMap = Modify_Brightness_D(_photoView.originalImageViewPixelMap, 35, width, height);
-            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
-            break;
-            
-        case ALGORITHM_THRESHOLD_D: // threshold
-            _photoView.originalImageViewPixelMap = Threshold_D(_photoView.originalImageViewPixelMap, 3, width, height);
-            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
-            break;
-            
-        case ALGORITHM_GAMMA_CORR_D: // gamma correction
-            _photoView.originalImageViewPixelMap = Gamma_Corr_D(_photoView.originalImageViewPixelMap, 3, width, height);
-            new_img = [ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height];
-            break;
-            
-        default:
-            if (imgCount == 0){
-                [_photoView setOriginalImage:[UIImage imageNamed:@"paris.png"]];
-                imgCount = 1;
-            }
-            else {
-                [_photoView setOriginalImage:[UIImage imageNamed:@"flatiron.png"]];
-                imgCount = 0;
-            }    
-            NSLog(@"defaulted in scrollViewbuttonPressed switch method");
-            break;
+    // if in live video mode, hide the apply changes button
+    if (_liveVideoController.session.running) {
+        _algorithmControlsView.applyChangesButton.hidden = YES;
+    }
+    else if (!_liveVideoController.session.running) {
+        _algorithmControlsView.applyChangesButton.hidden = NO;
     }
     
-    if (new_img != nil)
-        [_photoView setOriginalImage:new_img];
-    else
-        NSLog(@"new_img is nil");
-
-    // cleanup
-    /*if(bitmap) {
-     free(bitmap);	
-     bitmap = NULL;
-     }*/
+    // if the button is not a demo button, animate to algorithm view
+    if ([_algorithmHandler getCurrentAlgorithm] < ALGORITHM_DEMO) {
+        [self animateToAlgorithmViewWithTag:button.tag];
+    }
+    
+    // process the image with the selected algorithm
+    [_algorithmHandler processImage:_photoView.originalImageView.image];
 }
+
+
+
+
+#pragma mark - Touches and Adjusting Algorithm Inputs
+- (void)adjustAlgorithmInputs:(id)sender
+{
+    UIPanGestureRecognizer* panRecognizer = (UIPanGestureRecognizer*) sender;
+    
+    // if the adjustment has ended, set the previous value to the current
+    if ([panRecognizer state] == UIGestureRecognizerStateEnded)
+    {
+        [_algorithmHandler finishedAdjustingAlgorithmAlpha];
+        return;
+    }
+    
+    if ([panRecognizer state] == UIGestureRecognizerStateChanged || 
+        _photoView.isInAlgorithmView ||
+        [_algorithmHandler getCurrentAlgorithm] != ALGORITHM_INVERT ||
+        [_algorithmHandler getCurrentAlgorithm] != ALGORITHM_NONE) 
+    {
+        // change alpha value that goes into the algorithm
+        // then reprocess the image
+        CGPoint translatedPoint = [panRecognizer translationInView:self.view];
+        [_algorithmHandler adjustAlgorithmAlpha:translatedPoint.x];
+        [_algorithmHandler processImage:_photoView.originalImageView.image];
+    }
+}
+
 
 
 
 #pragma mark - Animations
 - (void) animateToAlgorithmViewWithTag:(int)tag
 {
+    CGRect bounds = self.view.bounds;
+    
     // set the photoView to be touchable
     _photoView.isInAlgorithmView = TRUE;
     
@@ -300,14 +240,11 @@ static int imgCount = 0;
     
     // ALGORITHM CONTROLS
     [self.view bringSubviewToFront:_algorithmControlsView];
-    float f_y = self.view.frame.size.height - ALGORITHM_VIEW_HEIGHT;
-    _algorithmControlsView.frame = CGRectMake(0.0, f_y, 320.0, ALGORITHM_VIEW_HEIGHT);
+    float f_y = bounds.size.height - ALGORITHM_VIEW_HEIGHT;
+    _algorithmControlsView.frame = CGRectMake(0.0, f_y, bounds.size.width, ALGORITHM_VIEW_HEIGHT);
         
     // SCROLLVIEW
-    _scrollView.frame = CGRectMake(_scrollView.frame.origin.x - _scrollView.frame.size.width,
-                                   _scrollView.frame.origin.y, 
-                                   _scrollView.frame.size.width, 
-                                   _scrollView.frame.size.height);
+    [_scrollViewController animateViewOnScreen];
     
     // NAVIGATION BAR
     CGRect navFrame = self.navigationController.navigationBar.frame;
@@ -315,21 +252,17 @@ static int imgCount = 0;
                                                                navFrame.origin.y - navFrame.size.height,
                                                                navFrame.size.width,
                                                                navFrame.size.height);
-    
     // PHOTOVIEW
-    // adjust the photoview to be center with the app's main window
-    CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
-    float new_center_y = appFrame.size.height/2.0 - (appFrame.size.height - self.view.frame.size.height);
-    _photoView.center = CGPointMake(_photoView.center.x, new_center_y);
+    [_photoView animateToAlgorithmViewGivenBounds:bounds];
     
-    NSLog(@"animating to algorithm view");
     [UIView commitAnimations];
 }
 
 
-
 - (void) animateToMainViewWithTag:(int)tag
 {
+    CGRect bounds = self.view.bounds;
+    
     // set photoView to not except touches
     _photoView.isInAlgorithmView = FALSE;
     
@@ -339,14 +272,10 @@ static int imgCount = 0;
     [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
     
     // ALGORITHM CONTROLS
-    _algorithmControlsView.frame = CGRectMake(0.0, self.view.frame.size.height, 320.0, ALGORITHM_VIEW_HEIGHT);
+    _algorithmControlsView.frame = CGRectMake(0.0, bounds.size.height, bounds.size.width, ALGORITHM_VIEW_HEIGHT);
     
     // SCROLLVIEW
-    [self.view bringSubviewToFront:_scrollView];
-    _scrollView.frame = CGRectMake(_scrollView.frame.origin.x + _scrollView.frame.size.width,
-                                   _scrollView.frame.origin.y, 
-                                   _scrollView.frame.size.width, 
-                                   _scrollView.frame.size.height);
+    [_scrollViewController animateViewOffScreen];
     
     // NAVIGATION BAR
     CGRect navFrame = self.navigationController.navigationBar.frame;
@@ -354,12 +283,11 @@ static int imgCount = 0;
                                                                navFrame.origin.y + navFrame.size.height,
                                                                navFrame.size.width,
                                                                navFrame.size.height);
-    
     // PHOTOVIEW
     // adjust the photoview to be center with the app's main window
-    _photoView.frame = PHOTOVIEW_FRAME;
+    [_photoView animateToMainViewGivenBounds:bounds];
     
-    NSLog(@"animating to main view");
+    //NSLog(@"animating to main view");
     [UIView commitAnimations];
 }
 
@@ -369,38 +297,94 @@ static int imgCount = 0;
 #pragma mark - OFAlgorithmViewDelegate methods
 - (void)algorithmViewBackButtonPressed
 {
-    NSLog(@"algo view back button pressed, communicating to delegate");
+    // don't change the original image
+    [_algorithmHandler setCurrentAlgorithm:ALGORITHM_NONE];
+    _photoView.editedImageView.image = NULL;
     [self animateToMainViewWithTag:0];
 }
 
+
 - (void)algorithmViewApplyChangesButtonPressed
 {
-    NSLog(@"algoView apply changes button pressed, this is delegate");
+    // change original image
+    [_photoView setOriginalImage:_photoView.editedImageView.image];
+    _photoView.editedImageView.image = NULL;
+    [_algorithmHandler setCurrentAlgorithm:ALGORITHM_NONE];
+    [self animateToMainViewWithTag:0];
 }
 
 
 
 
-#pragma mark - Nav Bar and Action Sheet Methods (UIActionSheetDelegate)
-
+#pragma mark - NavBar and Action Sheet Methods (UIActionSheetDelegate)
 - (void)openPhotoAS:(id)sender
 {
-	UIActionSheet *photoAS = [[UIActionSheet alloc] initWithTitle:@""
-                                                         delegate:self 
-                                                cancelButtonTitle:@"Cancel"
-                                           destructiveButtonTitle:nil
-                                                otherButtonTitles:@"Take a Photo",@"Photo Library",@"Record a Video",nil,nil];
+    // if the photoAS is displayed and the Open Image tabbar button is pressed again
+    if ([self dismissPhotoAS]) { return; }
+    
+    // dismiss popover, but don't return
+    if ([self dismissPhotoPopoverController]) { return; }
+    
+    // get the correct string for Live Video
+	NSString * liveVideoString;
+    if (!_liveVideoController.session.running) {
+        liveVideoString = @"Start Live Video";
+    }
+    else if (_liveVideoController.session.running) {
+        liveVideoString = @"Stop Live Video";
+    }
+    else {
+        NSLog(@"liveVideoController.session is neither running nor not running - attempting to assign action sheet string");
+    }
+    
+    // create an action sheet for buttons to camera functionality
+    _photoAS = [[UIActionSheet alloc] initWithTitle:@""
+                                           delegate:self 
+                                  cancelButtonTitle:@"Cancel"
+                             destructiveButtonTitle:nil
+                                  otherButtonTitles:@"Take a Photo",@"Photo Library",liveVideoString,nil,nil];
 
-    // mark A.S. tag so actionSheet:clickedButtonAtIndex:
-    // method can identify which functionality to perform
-    photoAS.tag = 0;
-	
-	// use the same style as the nav bar
-	photoAS.actionSheetStyle = (UIActionSheetStyle) self.navigationController.navigationBar.barStyle;
-	
-	[photoAS showInView:self.view];
-	[photoAS release];
+    // tag so actionSheet:clickedButtonAtIndex: can identify correctly
+    _photoAS.tag = 0;
+    _photoAS.actionSheetStyle = (UIActionSheetStyle) self.navigationController.navigationBar.barStyle;
+    
+    // depending on the device, adjust how action sheet is displayed
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        [_photoAS showFromBarButtonItem:self.navigationItem.leftBarButtonItem animated:TRUE];
+    }
+    else {
+        [_photoAS showInView:self.view];
+    }
+    
+    [_photoAS release];
 }
+
+
+- (BOOL)dismissPhotoAS
+{
+    if (_photoAS != nil) {
+        [_photoAS dismissWithClickedButtonIndex:0 animated:TRUE];
+        _photoAS = nil;
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
+
+- (BOOL)dismissPhotoPopoverController
+{
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad &&
+        _photoPopoverController != nil) 
+    {
+        [_photoPopoverController dismissPopoverAnimated:TRUE];
+        _photoPopoverController = nil;
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
 
 - (void)openActionAS:(id)sender
 {
@@ -410,13 +394,17 @@ static int imgCount = 0;
                                            destructiveButtonTitle:nil
                                                 otherButtonTitles:@"Save Photo to Library",@"Share on Facebook",nil,nil];
     
-    // mark A.S. tag so actionSheet:clickedButtonAtIndex:
-    // method can identify which functionality to perform
+    // tag so actionSheet:clickedButtonAtIndex: can identify correctly
     actionAS.tag = 1;
-    
     actionAS.actionSheetStyle = (UIActionSheetStyle) self.navigationController.navigationBar.barStyle;
 	
-    [actionAS showInView:self.view];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        [actionAS showFromBarButtonItem:self.navigationItem.rightBarButtonItem animated:TRUE];
+    }
+    else {
+        [actionAS showInView:self.view];   
+    }
+    
     [actionAS release];
 }
 
@@ -426,6 +414,8 @@ static int imgCount = 0;
     // if opening a photo or video
     if (modalView.tag == 0)
     {
+        [self dismissPhotoAS]; // always dismiss the AS
+        
         switch (buttonIndex)
         {
             case 0:
@@ -442,8 +432,18 @@ static int imgCount = 0;
             }
             case 2:
             {
-                [self startMovieControllerFromViewController:self
-                                               usingDelegate:self];
+                if (!_liveVideoController.session.running) {
+                    [_liveVideoController.session startRunning];
+                    _algorithmHandler.liveVideoIsRunning = TRUE;
+                }
+                else if (_liveVideoController.session.running) {
+                    [_liveVideoController.session stopRunning];
+                    _algorithmHandler.liveVideoIsRunning = FALSE;
+                }
+                else {
+                    NSLog(@"liveVideoController.session is neither running nor not running");
+                }
+                //[self startMovieControllerFromViewController:self usingDelegate:self];
                 break;
             }
         }
@@ -474,10 +474,15 @@ static int imgCount = 0;
 
 
 #pragma mark - Photo and Video Action Sheet Button Functionality
-
 - (BOOL)startCameraControllerFromViewController: (UIViewController*) controller
-                                   usingDelegate: (id <UIImagePickerControllerDelegate,
-                                                   UINavigationControllerDelegate>) delegate {
+                                  usingDelegate: (id <UIImagePickerControllerDelegate,
+                                                  UINavigationControllerDelegate>) delegate 
+{
+    if (_liveVideoController.session.running) {
+        [_liveVideoController.session stopRunning];
+        _algorithmHandler.liveVideoIsRunning = FALSE;
+        _liveVideoController.paused = YES;
+    }
     
     if (([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO)
         || (delegate == nil)
@@ -494,8 +499,7 @@ static int imgCount = 0;
     cameraUI.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeImage, nil];
     
     //cameraUI.mediaTypes =
-    //[UIImagePickerController availableMediaTypesForSourceType:
-    //UIImagePickerControllerSourceTypeCamera];
+    //[UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
     
     // Hides the controls for moving & scaling pictures, or for
     // trimming movies. To instead show the controls, use YES.
@@ -508,11 +512,10 @@ static int imgCount = 0;
 }
 
 
-
-- (BOOL)startMovieControllerFromViewController: (UIViewController*) controller
-                                 usingDelegate: (id <UIImagePickerControllerDelegate,
-                                                  UINavigationControllerDelegate>) delegate {
-    
+- (BOOL)startMovieControllerFromViewController:(UIViewController*) controller
+                                 usingDelegate:(id <UIImagePickerControllerDelegate,
+                                                UINavigationControllerDelegate>) delegate 
+{
     if (([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO)
         || (delegate == nil)
         || (controller == nil)) {
@@ -532,15 +535,26 @@ static int imgCount = 0;
     
     cameraUI.delegate = delegate;
     
-    [controller presentModalViewController: cameraUI animated: YES];
+    [controller presentModalViewController:cameraUI animated: YES];
+        
     return YES;
 }
 
 
-
-- (BOOL)startMediaBrowserFromViewController: (UIViewController*) controller
-                               usingDelegate: (id <UIImagePickerControllerDelegate,
-                                               UINavigationControllerDelegate>) delegate {
+- (BOOL)startMediaBrowserFromViewController:(UIViewController*) controller
+                              usingDelegate:(id <UIImagePickerControllerDelegate,
+                                             UINavigationControllerDelegate>) delegate {
+    
+    // dismiss popover, but don't return
+    [self dismissPhotoPopoverController];
+    
+    if (_liveVideoController.session.running && 
+        UI_USER_INTERFACE_IDIOM() != UIUserInterfaceIdiomPad) 
+    {
+        [_liveVideoController.session stopRunning];
+        _algorithmHandler.liveVideoIsRunning = FALSE;
+        _liveVideoController.paused = YES;
+    }
     
     if (([UIImagePickerController isSourceTypeAvailable:
           UIImagePickerControllerSourceTypeSavedPhotosAlbum] == NO)
@@ -555,7 +569,7 @@ static int imgCount = 0;
     // Camera Roll album.
     mediaUI.mediaTypes =
     [UIImagePickerController availableMediaTypesForSourceType:
-     UIImagePickerControllerSourceTypeSavedPhotosAlbum];
+    UIImagePickerControllerSourceTypeSavedPhotosAlbum];
     
     // Hides the controls for moving & scaling pictures, or for
     // trimming movies. To instead show the controls, use YES.
@@ -563,7 +577,17 @@ static int imgCount = 0;
     
     mediaUI.delegate = delegate;
     
-    [controller presentModalViewController: mediaUI animated: YES];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        _photoPopoverController = [[UIPopoverController alloc] initWithContentViewController:mediaUI];
+        //[popoverController setDelegate:self];
+        [_photoPopoverController presentPopoverFromBarButtonItem:self.navigationItem.leftBarButtonItem 
+                                        permittedArrowDirections:UIPopoverArrowDirectionUp 
+                                                        animated:TRUE];
+    }
+    else {
+        [controller presentModalViewController:mediaUI animated: YES];
+    }
+
     return YES;
 }
 
@@ -574,53 +598,111 @@ static int imgCount = 0;
 
 - (void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     
-    NSString *mediaType = [info objectForKey: UIImagePickerControllerMediaType];
+    // stop the live video session
+    if (_liveVideoController.session.running) {
+        [_liveVideoController.session stopRunning];
+        _algorithmHandler.liveVideoIsRunning = FALSE;
+    }
+    
+    NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
     UIImage *originalImage, *editedImage, *imageToUse;
     
     // Handle a still image taken with camera or picked from a photo album
     if (CFStringCompare ((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
-        
         editedImage   = (UIImage *) [info objectForKey:UIImagePickerControllerEditedImage];
         originalImage = (UIImage *) [info objectForKey:UIImagePickerControllerOriginalImage];
         
-        if (editedImage) {
-            imageToUse = editedImage;
-        } else {
-            imageToUse = originalImage;
+        if (picker.sourceType == UIImagePickerControllerSourceTypeCamera) {
+            // adjust picture scale depending on which camera is being used
+            float scale = 1.0;
+            if (picker.cameraDevice == UIImagePickerControllerCameraDeviceRear)
+                scale = PHOTOVIEW_REAR_CAMERA_SCALE;
+            else if (picker.cameraDevice == UIImagePickerControllerCameraDeviceFront)
+                scale = PHOTOVIEW_FRONT_CAMERA_SCALE;
+        
+            UIImageOrientation photoOrientation;
+            // grab either the editedImage or originalImage
+            if (editedImage) {
+                imageToUse = [UIImage imageWithCGImage:[editedImage CGImage] scale:scale orientation:UIImageOrientationUp];
+                photoOrientation = editedImage.imageOrientation;
+            } else {
+                imageToUse = [UIImage imageWithCGImage:[originalImage CGImage] scale:scale orientation:UIImageOrientationUp];
+                photoOrientation = originalImage.imageOrientation;
+            }
+                
+            // set imageToUse as our photo
+            if (photoOrientation == UIImageOrientationUp) {
+                [_algorithmHandler processImage:[imageToUse imageRotatedByDegrees:0.0]];
+            }
+            else if (photoOrientation == UIImageOrientationRight) {
+                [_algorithmHandler processImage:[imageToUse imageRotatedByDegrees:90.0]];
+            }
+            else if (photoOrientation == UIImageOrientationDown) {
+                [_algorithmHandler processImage:[imageToUse imageRotatedByDegrees:180.0]];
+            }
+            else if (photoOrientation == UIImageOrientationLeft) {
+                [_algorithmHandler processImage:[imageToUse imageRotatedByDegrees:270.0]];
+            }
+            else {
+                NSLog(@"FAIL: the photo doesn't have an orientation!");
+            }
         }
         
-        // dismiss the the modal view BEFORE setting the photo
-        // NSLog(@"dismissing view.");
+        else if (picker.sourceType == UIImagePickerControllerSourceTypePhotoLibrary ||
+            picker.sourceType == UIImagePickerControllerSourceTypeSavedPhotosAlbum) 
+        {
+            if (editedImage) {
+                imageToUse = editedImage;
+            } else {
+                imageToUse = originalImage;
+            }
+            [_algorithmHandler processImage:imageToUse];
+        }
+        
+        // dismiss the the modal view
         [self dismissModalViewControllerAnimated: YES];
         [picker release];
-        
-        // Do something with imageToUse
-        [_photoView setOriginalImage:imageToUse];
-        
-        NSLog(@"photoView.origView.image = %@", _photoView.originalImageView.image.description);
     }
     
-    // Handle a movied picked from a photo album
+    // TODO: Handle a movie picked from a photo album
     else if (CFStringCompare ((CFStringRef) mediaType, kUTTypeMovie, 0) == kCFCompareEqualTo) {
         
         NSLog(@"You have a recorded a video.");
         
-        NSString *moviePath = [[info objectForKey:UIImagePickerControllerMediaURL] path];
+        //NSString *moviePath = [[info objectForKey:UIImagePickerControllerMediaURL] path];
         // Do something with the picked movie available at moviePath
     }
 }
 
 
-
-
 // For responding to the user tapping Cancel whether in the camera or photo library.
 - (void) imagePickerControllerDidCancel: (UIImagePickerController *) picker 
 {
+    // if the live video was running before taking/uploading a photo (aka "paused"), restart
+    if ([_liveVideoController isPaused]) {
+        [_liveVideoController.session startRunning];
+        _algorithmHandler.liveVideoIsRunning = TRUE;
+        _liveVideoController.paused = YES;
+    }
+
     [self dismissModalViewControllerAnimated: YES];
     [picker release];
     
     // hide status bar again
     [OFHelperFunctions hideStatusBar];
+}
+
+
+
+
+#pragma mark - Helper Functions
+// simple helper function to print the contents of a frame combined with some prefix
+- (void) printContentsOfFrame:(CGRect)rect withPrefixString:(NSString*)prefix
+{
+    NSString* printStr = [prefix stringByAppendingString:@" ==> x: %3.2f, y: %3.2f, w: %3.2f, h: %3.2f"];
+    CGPoint origOrig = rect.origin;
+    CGSize  origSize = rect.size;
+    NSLog(printStr, origOrig.x, origOrig.y, origSize.width, origSize.height);
 }
 
 

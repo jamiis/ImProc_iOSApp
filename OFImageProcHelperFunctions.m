@@ -50,6 +50,9 @@
         }
     }
     
+    free(pixels);
+    free(grayPixels);
+    
     return grayPixels;
 }
 

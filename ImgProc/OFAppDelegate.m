@@ -18,6 +18,7 @@
 
 - (void)dealloc
 {
+    [_navController release];
     [_mainViewController release];
     
     [_window release];
@@ -30,16 +31,25 @@
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor viewFlipsideBackgroundColor];
     
+    /*
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        NSLog(@"I'm an IPAD!");
+        OFMainViewController* iPadViewController = [[OFMainViewController alloc] init];
+        iPadViewController.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
+        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:iPadViewController];
+        [self.window setRootViewController:navController];
+    } 
+    else {
+     */
+    
     // hide status bar
     [OFHelperFunctions hideStatusBar];
     
     _mainViewController = [[OFMainViewController alloc] init];
-    
     _navController = [[UINavigationController alloc] initWithRootViewController:_mainViewController];
     [_navController.navigationBar setTintColor:[UIColor blackColor]];
-    //[_navController.navigationBar.topItem setTitle:@"Image Processing"];
 
-    [self.window addSubview:_navController.view];
+    [self.window setRootViewController:_navController];
     [self.window makeKeyAndVisible];
 }
 

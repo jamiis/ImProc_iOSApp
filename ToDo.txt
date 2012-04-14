@@ -2,11 +2,28 @@
 
 ToDo
 
+Right away
+    Original photo needs to be restored when back button pressed
+        -When save button pressed, save changes made to photo
+    Graphics for back and fwd buttons
+    fix wait-fences
+    Center image in algo view?
+    
+
 Main Objectives:
     Histogram overlay
     Educational, algorithm description overlay
     Finger slider adjustment to algorithms
     iPad implementation
     
+Post 1st demo:
+    subclass scrollview so OFmainviewcontroller isn't so cluttered. this class will talk to the OFphotoview and OFvideoview
+    
+
 Optimizations:
 	* ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height]; in OFMainViewController.m Shouldn't have to caste to (unsigned char*).  convertBitmapRGBA8ToUIImage should just take a pixel*
+    
+Known bugs:
+    going from live video to pressing demo there is a malloc-free bug
+    sometimes the animations don't complete
+    Retina resizes some images and doesn't resize others.

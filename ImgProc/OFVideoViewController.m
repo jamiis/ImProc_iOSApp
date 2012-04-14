@@ -1,18 +1,18 @@
 //
-//  OFVideoViewControllerViewController.m
+//  OFVideoViewController.m
 //  ImgProc
 //
-//  Created by Jamis Johnson on 3/17/12.
+//  Created by Jamis Johnson on 3/19/12.
 //  Copyright (c) 2012 University of Utah. All rights reserved.
 //
 
-#import "OFVideoViewControllerViewController.h"
+#import "OFVideoViewController.h"
 
-@interface OFVideoViewControllerViewController ()
+@interface OFVideoViewController ()
 
 @end
 
-@implementation OFVideoViewControllerViewController
+@implementation OFVideoViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {

@@ -11,9 +11,9 @@
 @class OFAlgorithmControlsView;
 
 @protocol OFAlgorithmControlsViewDelegate <NSObject>
+@required
 - (void)algorithmViewBackButtonPressed;
 - (void)algorithmViewApplyChangesButtonPressed;
-@optional
 @end
 
 @interface OFAlgorithmControlsView : UIView {
@@ -22,7 +22,7 @@
     UIButton *_applyChangesButton;
 }
 
-@property (nonatomic, retain) id <OFAlgorithmControlsViewDelegate> delegate;
+@property (nonatomic, retain) id<OFAlgorithmControlsViewDelegate> delegate;
 @property (nonatomic, retain) UIButton *backButton;
 @property (nonatomic, retain) UIButton *applyChangesButton;
 
