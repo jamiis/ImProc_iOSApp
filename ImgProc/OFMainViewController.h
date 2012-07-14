@@ -8,40 +8,48 @@
 
 #import "Constants.h"
 #import "OFAlgorithmControlsView.h"
-#import "OFLiveVideo.h"
+#import "OFLiveVideoHandler.h"
 #import "OFPhotoView.h"
 #import "OFAlgorithmHandler.h"
 #import "OFAlgorithmScrollViewController.h"
+#import "OFInstructionImageView.h"
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 
 @class OFPhotoView;
 
-@interface OFMainViewController : UIViewController <UINavigationBarDelegate, 
-                                                    UIActionSheetDelegate, 
+@interface OFMainViewController : UIViewController <UIActionSheetDelegate, 
                                                     UIImagePickerControllerDelegate,
                                                     UINavigationControllerDelegate, 
                                                     OFAlgorithmControlsViewDelegate,
                                                     OFLiveVideoDelegate,
                                                     OFAlgorithmHandlerDelegate,
-                                                    OFAlgorithmScrollViewControllerDelegate> 
+                                                    OFAlgorithmScrollViewControllerDelegate, 
+                                                    OFInstructionImageViewDelegate> 
 {
     OFAlgorithmScrollViewController *_scrollViewController;
     OFPhotoView *_photoView;
-    OFLiveVideo *_liveVideoController;
+    OFLiveVideoHandler *_liveVideoController;
     OFAlgorithmControlsView *_algorithmControlsView;
     OFAlgorithmHandler *_algorithmHandler;
+    OFInstructionImageView *_instructionImageView;
+    UINavigationController *_navigationController;
+    
+    NSTimer *timer;    
+	BOOL shouldShowStats;
+    UILabel *algorithmConstantLabel;
+    UILabel *frameRateLabel;
+	
+	UIBackgroundTaskIdentifier backgroundRecordingID;
 }
 
 @property (nonatomic, retain) OFAlgorithmScrollViewController *scrollViewController;
 @property (nonatomic, retain) OFPhotoView *photoView;
-@property (nonatomic, retain) OFLiveVideo *liveVideoController;
+@property (nonatomic, retain) OFLiveVideoHandler *liveVideoController;
 @property (nonatomic, retain) OFAlgorithmControlsView *algorithmControlsView;
 @property (nonatomic, retain) OFAlgorithmHandler *algorithmHandler;
-
-//@property (nonatomic, retain) UIActionSheet *photoAS;
-//@property (nonatomic, retain) UIActionSheet *actionAS;
-
+@property (nonatomic, retain) OFInstructionImageView *instructionImageView;
+@property (nonatomic, retain) UINavigationController *navigationController;
 
 - (void)scrollViewButtonPressed:(id)sender;
 - (void)animateToAlgorithmViewWithTag:(int)tag;

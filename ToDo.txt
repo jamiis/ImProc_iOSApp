@@ -1,29 +1,88 @@
 
+TODO
 
-ToDo
-
-Right away
-    Original photo needs to be restored when back button pressed
-        -When save button pressed, save changes made to photo
-    Graphics for back and fwd buttons
+MAIN
     fix wait-fences
-    Center image in algo view?
+    alphaCurrentDouble needs to be a double value not an int, ie. 2.000!
+    FIGURE OUT 0.0-1.0 UNSHARPEN MASK
+    *photoView needs to have full image, and scaled image. process scaled image until "apply" is hit.
+    Record Video, correct orientation!!!
+    figure out minFrameDuration
+    make global state variables!!!!!!
+    remove Info button
+    turn off NSZombieEnabled
     
+    X* still photo -> go to iphone main screen -> go back into app -> nav bar is viewable
+    remove Record button!
+    record some examples!
+    "effects" sash across effects icons
+    implement STATic
+    
+    
+    
+UI UI UI!!
+    IPAD!!!
+    SEPERATE ICONS AND SCROLL BAR FOR IPAD
+    Set nav bar title to cool GRAPHIC: "ScIP"
+    Graphics for back and fwd buttons
+    Put sample "sash" across sample photos
+    Put bright white light behind image, will make bg look real gud
+
 
 Main Objectives:
-    Histogram overlay
     Educational, algorithm description overlay
-    Finger slider adjustment to algorithms
     iPad implementation
+    Video recording
+    Histogram overlay
     
-Post 1st demo:
-    subclass scrollview so OFmainviewcontroller isn't so cluttered. this class will talk to the OFphotoview and OFvideoview
-    
+TODO AFTER MTG WITH JIM, BEFORE DEMO
+    clean up animation code, clean up how views resize each other!!
+    implement educational overlay!
+    make liveVideoRunning GLOBAL CONSTANT!!!
+    figure out how to keep live video going while selecting a photo on ipad
+
 
 Optimizations:
-	* ImageConverter convertBitmapRGBA8ToUIImage:(unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height]; in OFMainViewController.m Shouldn't have to caste to (unsigned char*).  convertBitmapRGBA8ToUIImage should just take a pixel*
-    
+	* ImageConverter convertBitmapRGBA8ToUIImage:
+    (unsigned char*)_photoView.originalImageViewPixelMap withWidth:width withHeight:height]; in OFMainViewController.m 
+              Shouldn't have to caste to (unsigned char*).  convertBitmapRGBA8ToUIImage should just take a pixel*
+    figure out minFrameDuration
+    make global state variables!!!!!!
+    check pixel_copy speed in processImage: pixel *newBitmap   = (pixel *) pixel_copy(imageBitmap, width, height);
+
+
 Known bugs:
     going from live video to pressing demo there is a malloc-free bug
-    sometimes the animations don't complete
-    Retina resizes some images and doesn't resize others.
+    figure out minFrameDuration
+    still photo -> go to iphone main screen -> go back into app -> nav bar is viewable
+    
+Finalizations before hand in:
+    Remove all NSLog calls
+    Remove helper printFrameContents calls
+
+
+
+
+Algorithms Needed
+    ::: Edges
+X   Gradient Magnitude
+X   Sobel_Edges - go with sobel instead of prewitt
+    // Prewitt_Edges
+X   Fast_Edges
+    
+    ::: Effects
+    Cartoon - clamp colors at 8-15
+    Posterize
+    Sketch - clamp alpha at 120
+
+    ::Filter
+    Max_Filter - 'dilate'
+    Min_Filter - 'erode'
+    Median_Filter - noise reduction/blur
+    Static ?
+X   Gaussian_Blur
+X   Fast_Blur_Color
+    //Blur_Or_Sharpen - ? possibly don't implement
+    //Fast_Sharpen - doesn't look good right now
+X   Unsharp_Masking - use this one, even though slow
+

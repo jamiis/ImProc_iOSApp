@@ -31,17 +31,6 @@
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor viewFlipsideBackgroundColor];
     
-    /*
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        NSLog(@"I'm an IPAD!");
-        OFMainViewController* iPadViewController = [[OFMainViewController alloc] init];
-        iPadViewController.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
-        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:iPadViewController];
-        [self.window setRootViewController:navController];
-    } 
-    else {
-     */
-    
     // hide status bar
     [OFHelperFunctions hideStatusBar];
     
@@ -50,6 +39,7 @@
     [_navController.navigationBar setTintColor:[UIColor blackColor]];
 
     [self.window setRootViewController:_navController];
+//    [self.window setRootViewController:_mainViewController];
     [self.window makeKeyAndVisible];
 }
 

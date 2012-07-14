@@ -15,17 +15,8 @@
 
 @synthesize delegate = _delegate, 
             isInAlgorithmView = _isInAlgorithmView,
-            viewingMode = _viewingMode,
-            editedImageView = _editedImageView, 
-originalImageView = _originalImageView;
-
-const NSInteger kOriginalImageViewTag = 1;
-const NSInteger kEditedImageViewTag = 2;
-
-const float kViewFrameMaxY = 300.0;
-const float kViewFrameMaxX = 280.0;
-
-
+            editedImageView   = _editedImageView, 
+            originalImageView = _originalImageView;
 
 
 #pragma mark - Lifecycle
@@ -35,17 +26,16 @@ const float kViewFrameMaxX = 280.0;
     if (self) 
     {
         _isInAlgorithmView = FALSE;
-        _viewingMode = PHOTO_MODE;
         
         // create an UIImageView to hold the ORIGINAL image
         _originalImageView = [[UIImageView alloc] init];
-        _originalImageView.tag = kOriginalImageViewTag;
+        //_originalImageView.tag = kOriginalImageViewTag;
         _originalImageView.center = self.center;
         [self addSubview:_originalImageView];
         
         // create an UIImageView to hold the EDITED image
         _editedImageView = [[UIImageView alloc] init];
-        _editedImageView.tag = kEditedImageViewTag;
+        //_editedImageView.tag = kEditedImageViewTag;
         [self addSubview:_editedImageView];
         //[_editedImageView release];
     }
@@ -58,26 +48,27 @@ const float kViewFrameMaxX = 280.0;
 #pragma mark - Overrides
 - (void)setOriginalImage:(UIImage*)image
 {
-//    NSLog(@"ORIG image size: %3.6f, %3.6f", image.size.width, image.size.height);
+    // if img is too big to process quickly, resize image to 1.5 the size of this view
+    image = [self resizeOriginalImage:image];
     
+    // set original image
     _originalImageView.image = image;
+    
+    // resize the image view to fit inside of the photoView
     [self resizeImageView:_originalImageView];
+    
     _editedImageView.image = NULL;
 
-    NSLog(@"ORIG image size: %3.6f, %3.6f", _originalImageView.image.size.width, _originalImageView.image.size.height);
-//    NSLog(@"ORIG frame size: %3.6f, %3.6f", _originalImageView.frame.size.width, _originalImageView.frame.size.height);
+    //NSLog(@"ORIG after size: %3.6f, %3.6f", _originalImageView.image.size.width, _originalImageView.image.size.height);
 }
 
 
 - (void)setEditedImage:(UIImage*)image
 {
-//    NSLog(@"EDIT image size: %3.6f, %3.6f", image.size.width, image.size.height);
-    
     _editedImageView.image = image;
     [self resizeImageView:_editedImageView];
 
-    NSLog(@"EDIT image size: %3.6f, %3.6f", _editedImageView.image.size.width, _editedImageView.image.size.height);
-//    NSLog(@"EDIT frame size: %3.6f, %3.6f", _editedImageView.frame.size.width, _editedImageView.frame.size.height);
+    //NSLog(@"EDIT image size: %3.6f, %3.6f", _editedImageView.image.size.width, _editedImageView.image.size.height);
 }
 
 
@@ -88,7 +79,7 @@ const float kViewFrameMaxX = 280.0;
 - (void)resizeImageView:(UIImageView*)imgView
 {
     // compute scale factor for imageView
-    float widthScale  = self.frame.size.width / imgView.image.size.width;
+    float widthScale  = self.frame.size.width  / imgView.image.size.width;
     float heightScale = self.frame.size.height / imgView.image.size.height;
     
     CGFloat imageViewXOrigin = 0;
@@ -114,14 +105,42 @@ const float kViewFrameMaxX = 280.0;
 }
 
 
+- (UIImage*)resizeOriginalImage:(UIImage*)image
+{
+    if (image.size.width > PHOTOVIEW_ORIGINAL_IMAGE_SCALE*self.frame.size.width) {
+        //NSLog(@"this photo was resized");
+        NSLog(@"wORIG befor size: %3.6f, %3.6f", image.size.width, image.size.height);
+        
+        float scaleFactor = PHOTOVIEW_ORIGINAL_IMAGE_SCALE*self.frame.size.width/image.size.width;
+        CGSize scaledSize = CGSizeMake(image.size.width*scaleFactor, image.size.height*scaleFactor);
+        UIGraphicsBeginImageContext(scaledSize);
+        [image drawInRect:CGRectMake(0, 0, scaledSize.width, scaledSize.height)];
+        image = UIGraphicsGetImageFromCurrentImageContext();    
+        UIGraphicsEndImageContext();
+    }
+    else if (image.size.height > PHOTOVIEW_ORIGINAL_IMAGE_SCALE*self.frame.size.height) {
+        //NSLog(@"this photo was resized");
+        NSLog(@"hORIG befor size: %3.6f, %3.6f", image.size.width, image.size.height);
+        
+        float scaleFactor = PHOTOVIEW_ORIGINAL_IMAGE_SCALE*self.frame.size.height/image.size.height;
+        CGSize scaledSize = CGSizeMake(image.size.width*scaleFactor, image.size.height*scaleFactor);
+        UIGraphicsBeginImageContext(scaledSize);
+        [image drawInRect:CGRectMake(0, 0, scaledSize.width, scaledSize.height)];
+        image = UIGraphicsGetImageFromCurrentImageContext();    
+        UIGraphicsEndImageContext();
+    }
+    return image;
+}
+
+
 /* resize entire view, different for ipad and iphone */
 - (void)resizeGivenBounds:(CGRect)bounds
 {
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        float margin = 60.0;
+        float margin = 45.0;
         self.frame = CGRectMake(margin, margin, 
                                 bounds.size.width  - 2*margin, 
-                                bounds.size.height - 2*margin - SCROLLVIEW_HEIGHT);
+                                bounds.size.height - 2*margin - SCROLLVIEW_HEIGHT_IPAD);
     }
     else {
         float margin = 15.0;
@@ -135,7 +154,6 @@ const float kViewFrameMaxX = 280.0;
 
 - (void)animateToAlgorithmViewGivenBounds:(CGRect)bounds
 {
-    NSLog(@"animationToAlgorithmView");
     /*
     CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
     float new_center_y = appFrame.size.height/2.0 - (appFrame.size.height - self.view.frame.size.height);
@@ -151,7 +169,6 @@ const float kViewFrameMaxX = 280.0;
 
 - (void)animateToMainViewGivenBounds:(CGRect)bounds
 {
-    NSLog(@"animating to main view yo!");
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         // do some ipad'ing
     }

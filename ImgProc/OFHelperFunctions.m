@@ -21,7 +21,6 @@
 + (void) hideStatusBar
 {
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:NO];
-    //[UIApplication sharedApplication].keyWindow.frame=CGRectMake(0, 0, 320, 480);
 }
 
 @end

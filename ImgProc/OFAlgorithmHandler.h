@@ -27,15 +27,19 @@
     double _algorithmAlphaDoublePrevious;
 
     BOOL _liveVideoIsRunning;
+    BOOL _liveVideoIsRecording;
 }
 
 @property (nonatomic, retain) id<OFAlgorithmHandlerDelegate> delegate;
 @property (nonatomic, retain) OFAlgorithmAttributes *algorithm;
 @property (nonatomic) BOOL liveVideoIsRunning;
+@property (nonatomic) BOOL liveVideoIsRecording;
 
 - (void)setCurrentAlgorithm:(int)newAlgorithm;
 - (int)getCurrentAlgorithm;
+- (int)getCurrentAlpha;
 - (void)processImage:(UIImage*)image;
+- (void)processPixelBuffer:(CVImageBufferRef)pixelBuffer ;
 - (void)adjustAlgorithmAlpha:(float)translatedX;
 - (void)finishedAdjustingAlgorithmAlpha;
 - (void)setInitialAlpha;

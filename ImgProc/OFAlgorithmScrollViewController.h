@@ -24,9 +24,6 @@
 @property (nonatomic, retain) UIScrollView *scrollView;
 
 - (void)scrollViewButtonPressed:(id)sender;
-- (void)animateViewOnScreen;
-- (void)animateViewOffScreen;
-- (void)rearrangeButtons:(CGRect)bounds;
 - (void)resizeInFrame:(CGRect)frame;
 
 @end
